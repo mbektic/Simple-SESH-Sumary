@@ -1,6 +1,10 @@
 # Simple-SESH-Sumary
 Generates a simple HTML page from you Spotify extended streaming history just by telling it where the directory.
 
+## Before you start
+ - If you want to get a copy of your Spotify extended streaming history you can get it [HERE](https://www.spotify.com/us/account/privacy/)
+ - I wrote this with python 3.11.6, but any recent version of python _should_ work.
+
 ## Parameters
 At the top of the `GenerateHTMLSumary.py` script you can alter these parameters to your liking.
 #### Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
