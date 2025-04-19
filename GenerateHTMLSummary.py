@@ -2,7 +2,9 @@ import json
 import os
 from collections import defaultdict
 
-#Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
+# How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
+PLAYTIME_MODE = False
+# Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
 MIN_MILLISECONDS = 20000
 # Directory where your json files are, easyist method is to just drop them in the sesh folder.
 INPUT_DIR = "sesh"
@@ -10,6 +12,16 @@ INPUT_DIR = "sesh"
 OUTPUT_FILE = "summary.html"
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
+
+VERSION = "1.1.0"
+GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
+
+def ms_to_hms(ms):
+    seconds = ms // 1000
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
 def count_plays_from_directory(input_dir, output_html):
@@ -37,17 +49,25 @@ def count_plays_from_directory(input_dir, output_html):
 
         for entry in data:
             if entry.get("ms_played") is not None:
-                if entry.get("ms_played") > 20000 and  entry.get("master_metadata_album_artist_name"):
+                if (entry.get("ms_played") > 20000 or PLAYTIME_MODE) and  entry.get("master_metadata_album_artist_name"):
                     artist = entry.get("master_metadata_album_artist_name")
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
 
-                    if artist:
-                        artist_counts[artist] += 1
-                    if track:
-                        track_counts[track] += 1
-                    if album:
-                        album_counts[album] += 1
+                    if PLAYTIME_MODE:
+                        if artist:
+                            artist_counts[artist] += entry.get("ms_played")
+                        if track:
+                            track_counts[track] += entry.get("ms_played")
+                        if album:
+                            album_counts[album] += entry.get("ms_played")
+                    else:
+                        if artist:
+                            artist_counts[artist] += 1
+                        if track:
+                            track_counts[track] += 1
+                        if album:
+                            album_counts[album] += 1
 
     def generate_js():
         return """<script>
@@ -128,15 +148,23 @@ window.onload = function () {
         """
 
     def build_table(title, counts, table_id):
-        rows = "\n".join(
-            f"<tr><td>{rank}</td><td>{name}</td><td>{count}</td></tr>"
-            for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
-        )
+        if PLAYTIME_MODE:
+            MODE_STRING = "Time Listened (Hours:Minutes:Seconds)"
+            rows = "\n".join(
+                f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
+                for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
+            )
+        else:
+            MODE_STRING = "Plays"
+            rows = "\n".join(
+                f"<tr><td>{rank}</td><td>{name}</td><td>{count}</td></tr>"
+                for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
+            )
         return f"""
         <h2>{title}</h2>
         <table id="{table_id}">
             <thead>
-                <tr><th>Rank</th><th>Name</th><th>Plays</th></tr>
+                <tr><th>Rank</th><th>Name</th><th>{MODE_STRING}</th></tr>
             </thead>
             <tbody>
                 {rows}
@@ -169,7 +197,7 @@ window.onload = function () {
             }}
             th, td {{
                 padding: 12px;
-                text-align: left;
+                text-align: center;
                 border-bottom: 1px solid #ddd;
             }}
             th {{
@@ -222,6 +250,9 @@ window.onload = function () {
         {build_table("🎶 Track Play Counts", track_counts, "track-table")}
         {build_table("💿 Album Play Counts", album_counts, "album-table")}
     </body>
+    <footer>
+      <a href="{GITHUB_URL}">Version: {VERSION}</a>
+    </footer>
     </html>
     """
 
