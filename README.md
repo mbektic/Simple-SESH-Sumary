@@ -32,16 +32,16 @@ At the top of the `GenerateHTMLSumary.py` script you can alter these parameters 
 
 
 ### Artist
-![Image](https://github.com/user-attachments/assets/1ed71a9b-3fc3-4d64-b755-ed837a5c4d10)
+![Image](https://github.com/user-attachments/assets/57b80fb0-9723-42f8-9cb3-27f33c4ef3ac)
 
 ### Tracks
-![Image](https://github.com/user-attachments/assets/f8c87a13-ab21-486a-8722-b0c674c812b3)
+![Image](https://github.com/user-attachments/assets/c5559148-3f2b-4020-a880-03d099e57b49)
 
 ### Albums
-![Image](https://github.com/user-attachments/assets/e21120d1-32be-467d-8089-36e91f15eb5f)
+![Image](https://github.com/user-attachments/assets/d5e31b9f-caa8-4ab6-9278-88346102fab1)
 
 ### Playtime Mode True
-![Image](https://github.com/user-attachments/assets/8da91757-85ff-40e0-a120-925c11d0668b)
+![Image](https://github.com/user-attachments/assets/b2839baa-9977-461e-aea2-2a3a0df3a4aa)
 
 
 ### Conclusion/Rambling

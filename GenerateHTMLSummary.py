@@ -13,8 +13,13 @@ OUTPUT_FILE = "summary.html"
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
 
-VERSION = "1.1.2"
+
+VERSION = "1.1.3"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
+if PLAYTIME_MODE:
+    TITLE_MODE_STRING = "Play Time"
+else:
+    TITLE_MODE_STRING = "Play Count"
 
 def ms_to_hms(ms):
     seconds = ms // 1000
@@ -180,7 +185,7 @@ window.onload = function () {
         <title>Play Counts Summary</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: 'Courier New', monospace;
                 background: #f4f4f9;
                 padding: 20px;
                 color: #333;
@@ -246,9 +251,9 @@ window.onload = function () {
     </head>
     <body>
         <h1>Play Counts Summary</h1>
-        {build_table("🎤 Artist Play Counts", artist_counts, "artist-table")}
-        {build_table("🎶 Track Play Counts", track_counts, "track-table")}
-        {build_table("💿 Album Play Counts", album_counts, "album-table")}
+        {build_table("🎤 Artist  " + TITLE_MODE_STRING, artist_counts, "artist-table")}
+        {build_table("🎶 Track  " + TITLE_MODE_STRING, track_counts, "track-table")}
+        {build_table("💿 Album  " + TITLE_MODE_STRING, album_counts, "album-table")}
     </body>
     <footer>
       <a href="{GITHUB_URL}">Version: {VERSION}</a>
