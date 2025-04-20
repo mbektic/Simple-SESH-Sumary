@@ -12,9 +12,11 @@ INPUT_DIR = "sesh"
 OUTPUT_FILE = "summary.html"
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
+# If you want the result to be styled with darker colors. (See screenshots on the GitHub page)
+DARK_MODE = True
 
 
-VERSION = "1.1.3"
+VERSION = "1.2.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 if PLAYTIME_MODE:
     TITLE_MODE_STRING = "Play Time"
@@ -27,6 +29,21 @@ def ms_to_hms(ms):
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
     return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+def print_file(path):
+    with open(path, 'r') as file:
+        contents = file.read()
+    return contents
+
+def print_styles():
+    styles = ""
+    styles += print_file("style/style.css")
+    if DARK_MODE:
+        styles += print_file("style/dark.css")
+    else:
+        styles += print_file("style/light.css")
+
+    return styles
 
 
 def count_plays_from_directory(input_dir, output_html):
@@ -184,68 +201,7 @@ window.onload = function () {
         <meta charset="UTF-8">
         <title>Play Counts Summary</title>
         <style>
-            body {{
-                font-family: 'Courier New', monospace;
-                background: #f4f4f9;
-                padding: 20px;
-                color: #333;
-            }}
-            h1, h2 {{
-                text-align: center;
-            }}
-            table {{
-                width: 60%;
-                margin: 20px auto;
-                border-collapse: collapse;
-                background-color: #fff;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }}
-            th, td {{
-                padding: 12px;
-                text-align: center;
-                border-bottom: 1px solid #ddd;
-            }}
-            th {{
-                background-color: #007acc;
-                color: white;
-            }}
-            tr:hover {{
-                background-color: #f1f1f1;
-            }}
-            .pagination {{
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 6px;
-                margin: 15px auto 40px;
-                font-family: sans-serif;
-            }}
-            .pagination button {{
-                background: none;
-                border: none;
-                padding: 6px 10px;
-                font-size: 14px;
-                cursor: pointer;
-                color: #333;
-                border-bottom: 2px solid transparent;
-                transition: border-color 0.2s ease;
-            }}
-            .pagination button.hover {{
-               border-color: #999;
-            }}
-            .pagination button.active {{
-                border-color: red;
-                font-weight: bold;
-                color: red;
-            }}
-            .pagination button.disabled {{
-                color: #ccc;
-                cursor: default;
-            }}
-            .pagination .ellipsis {{
-                padding: 6px 8px;
-                color: #aaa;
-            }}
+            {print_styles()}
         </style>
         {generate_js()}
     </head>

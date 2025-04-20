@@ -5,8 +5,8 @@ Generates a simple HTML page from you Spotify extended streaming history just by
  - If you want to get a copy of your Spotify extended streaming history you can get it [HERE](https://www.spotify.com/us/account/privacy/)
  - I wrote this with python 3.11.6, but any recent version of python _should_ work.
 
-## Parameters
-At the top of the `GenerateHTMLSumary.py` script you can alter these parameters to your liking.
+## Options
+At the top of the `GenerateHTMLSumary.py` script you can alter these options to your liking.
 #### How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
 `PLAYTIME_MODE = True` or `PLAYTIME_MODE = False`
 #### Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
@@ -17,6 +17,8 @@ At the top of the `GenerateHTMLSumary.py` script you can alter these parameters 
 `OUTPUT_FILE = "summary.html"`
 #### The number of items per table page.
 `ITEMS_PER_PAGE = 10`
+#### If you want the result to be styled with darker colors. (See screenshots on the GitHub page)
+`DARK_MODE = False`
 
 ## Running
  - Just run the script using `python.exe .\GenerateHTMLSummary.py`  
@@ -28,20 +30,18 @@ At the top of the `GenerateHTMLSumary.py` script you can alter these parameters 
 
 ## IMPORTANT NOTES!!!!
 - When you first open the html page it will take a few seconds to render pagination (the multiple pages for tables). Just wait until you see the page update and everything will work smoothly.
+- The resulting `summary.html` file can be shared without any of the other scripts or style files as it is all built into it.
 - None of your data ever leaves your system or is uploaded anywhere, this all stays on your machine.
 
 
-### Artist
-![Image](https://github.com/user-attachments/assets/57b80fb0-9723-42f8-9cb3-27f33c4ef3ac)
+### Artist (Dark Mode True and Play Time Mode False)
+![Image](https://github.com/user-attachments/assets/3612d0f4-74de-4663-99ee-438bd32670d6)
 
-### Tracks
-![Image](https://github.com/user-attachments/assets/c5559148-3f2b-4020-a880-03d099e57b49)
+### Tracks (Dark Mode True and Play Time Mode True)
+![Image](https://github.com/user-attachments/assets/49c5aaa3-c603-456a-a890-f0784ab3e8cf)
 
-### Albums
-![Image](https://github.com/user-attachments/assets/d5e31b9f-caa8-4ab6-9278-88346102fab1)
-
-### Playtime Mode True
-![Image](https://github.com/user-attachments/assets/b2839baa-9977-461e-aea2-2a3a0df3a4aa)
+### Albums (Dark Mode False and Play Time Mode False)
+![Image](https://github.com/user-attachments/assets/b295dcd5-7980-497d-86a5-56f3608e1e9f)
 
 
 ### Conclusion/Rambling
