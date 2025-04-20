@@ -13,7 +13,7 @@ OUTPUT_FILE = "summary.html"
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 def ms_to_hms(ms):
