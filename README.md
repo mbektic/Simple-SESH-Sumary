@@ -1,6 +1,8 @@
 # Simple-SESH-Sumary
 Generates a simple HTML page from you Spotify extended streaming history just by telling it where the directory.
 
+Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
+
 ## Before you start
  - If you want to get a copy of your Spotify extended streaming history you can get it [HERE](https://www.spotify.com/us/account/privacy/)
  - I wrote this with python 3.11.6, but any recent version of python _should_ work.
@@ -35,13 +37,13 @@ At the top of the `GenerateHTMLSumary.py` script you can alter these options to 
 
 
 ### Artist (Dark Mode True and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/3612d0f4-74de-4663-99ee-438bd32670d6)
+![Image](https://github.com/user-attachments/assets/47da2463-b434-498d-a8df-ffdac040b71e)
 
 ### Tracks (Dark Mode True and Play Time Mode True)
-![Image](https://github.com/user-attachments/assets/49c5aaa3-c603-456a-a890-f0784ab3e8cf)
+![Image](https://github.com/user-attachments/assets/b19c2734-c9f0-4ae3-adb8-9c5d20f0255c)
 
 ### Albums (Dark Mode False and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/b295dcd5-7980-497d-86a5-56f3608e1e9f)
+![Image](https://github.com/user-attachments/assets/6e989d50-2e98-4b87-96c3-5a42194acccd)
 
 
 ### Conclusion/Rambling

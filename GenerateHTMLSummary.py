@@ -5,7 +5,7 @@ from collections import defaultdict
 VERSION = "1.2.1"
 
 # How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
-PLAYTIME_MODE = True
+PLAYTIME_MODE = False
 # Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
 MIN_MILLISECONDS = 20000
 # Directory where your json files are, easyist method is to just drop them in the sesh folder.
