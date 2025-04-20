@@ -2,7 +2,7 @@ import json
 import os
 from collections import defaultdict
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 # How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
 PLAYTIME_MODE = False
@@ -19,10 +19,6 @@ DARK_MODE = True
 
 
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
-if PLAYTIME_MODE:
-    TITLE_MODE_STRING = "Play Time"
-else:
-    TITLE_MODE_STRING = "Play Count"
 
 def ms_to_hms(ms):
     seconds = ms // 1000
@@ -105,7 +101,7 @@ def count_plays_from_directory(input_dir, output_html):
 
     def build_table(title, counts, table_id):
         if PLAYTIME_MODE:
-            MODE_STRING = "Time Listened (Hours:Minutes:Seconds ms)"
+            MODE_STRING = "Playtime (Hours:Minutes:Seconds ms)"
             rows = "\n".join(
                 f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
                 for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
@@ -140,10 +136,10 @@ def count_plays_from_directory(input_dir, output_html):
         {generate_js()}
     </head>
     <body>
-        <h1>Play Counts Summary</h1>
-        {build_table("🎤 Artist  " + TITLE_MODE_STRING, artist_counts, "artist-table")}
-        {build_table("🎶 Track  " + TITLE_MODE_STRING, track_counts, "track-table")}
-        {build_table("💿 Album  " + TITLE_MODE_STRING, album_counts, "album-table")}
+        <h1>Spotify Extend Streaming History Summary</h1>
+        {build_table("🎤 Artists", artist_counts, "artist-table")}
+        {build_table("🎶 Tracks", track_counts, "track-table")}
+        {build_table("💿 Albums", album_counts, "album-table")}
     </body>
     <footer>
       <a href="{GITHUB_URL}">Version: {VERSION}</a>

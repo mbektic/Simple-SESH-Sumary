@@ -37,13 +37,13 @@ At the top of the `GenerateHTMLSumary.py` script you can alter these options to 
 
 
 ### Artist (Dark Mode True and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/47da2463-b434-498d-a8df-ffdac040b71e)
+![Image](https://github.com/user-attachments/assets/cf98a426-ac6c-48b1-b21b-a53e35322d62)
 
 ### Tracks (Dark Mode True and Play Time Mode True)
-![Image](https://github.com/user-attachments/assets/b19c2734-c9f0-4ae3-adb8-9c5d20f0255c)
+![Image](https://github.com/user-attachments/assets/d575b7f9-7b61-43a5-9785-4a116a88ed50)
 
 ### Albums (Dark Mode False and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/6e989d50-2e98-4b87-96c3-5a42194acccd)
+![Image](https://github.com/user-attachments/assets/4cff5ae1-0ba6-409c-a7af-731958900921)
 
 
 ### Conclusion/Rambling
