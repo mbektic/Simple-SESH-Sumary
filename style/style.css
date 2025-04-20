@@ -8,7 +8,7 @@ h1, h2 {
 }
 
 table {
-    width: 60%;
+    width: 75%;
     margin: 20px auto;
     border-collapse: collapse;
     background-color: #fff;
@@ -17,9 +17,13 @@ table {
 
 th, td {
     padding: 12px;
-    text-align: center;
+    text-align: left;
     border-bottom: 1px solid #ddd;
     font-size: larger;
+}
+
+tr td:nth-of-type(2) {
+  width: 60%;
 }
 
 th {

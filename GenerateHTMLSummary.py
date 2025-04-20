@@ -2,8 +2,10 @@ import json
 import os
 from collections import defaultdict
 
+VERSION = "1.2.1"
+
 # How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
-PLAYTIME_MODE = False
+PLAYTIME_MODE = True
 # Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
 MIN_MILLISECONDS = 20000
 # Directory where your json files are, easyist method is to just drop them in the sesh folder.
@@ -16,7 +18,6 @@ ITEMS_PER_PAGE = 10
 DARK_MODE = True
 
 
-VERSION = "1.2.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 if PLAYTIME_MODE:
     TITLE_MODE_STRING = "Play Time"
@@ -28,7 +29,8 @@ def ms_to_hms(ms):
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
-    return f"{hours:02}:{minutes:02}:{seconds:02}"
+    milliseconds = ms - (hours * 60 * 60 * 1000) - (minutes * 60 * 1000) - (seconds * 1000)
+    return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds}ms"
 
 def print_file(path):
     with open(path, 'r') as file:
@@ -76,7 +78,8 @@ def count_plays_from_directory(input_dir, output_html):
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
 
-                    if PLAYTIME_MODE:
+
+                    if PLAYTIME_MODE and entry.get("ms_played") > 0:
                         if artist:
                             artist_counts[artist] += entry.get("ms_played")
                         if track:
@@ -92,86 +95,17 @@ def count_plays_from_directory(input_dir, output_html):
                             album_counts[album] += 1
 
     def generate_js():
-        return """<script>
-function paginateTable(tableId, pageSize) {
-    const table = document.getElementById(tableId);
-    const tbody = table.querySelector("tbody");
-    const rows = Array.from(tbody.querySelectorAll("tr"));
-    const totalPages = Math.ceil(rows.length / pageSize);
-
-    let currentPage = 1;
-
-    function renderPage(page) {
-        currentPage = page;
-        rows.forEach((row, index) => {
-            row.style.display = (index >= (page - 1) * pageSize && index < page * pageSize) ? "" : "none";
-        });
-        renderPagination();
-    }
-
-    function renderPagination() {
-        const nav = document.getElementById(`${tableId}-nav`);
-        nav.innerHTML = "";
-
-        function createButton(label, page, active = false, disabled = false) {
-            const btn = document.createElement("button");
-            btn.textContent = label;
-            if (active) btn.classList.add("active");
-            if (disabled) btn.disabled = true;
-            btn.onclick = () => renderPage(page);
-            nav.appendChild(btn);
-        }
-
-        // Prev button
-        createButton("Prev", currentPage - 1, false, currentPage === 1);
-
-        // Page buttons
-        const pageWindow = 2;
-        const startPage = Math.max(1, currentPage - pageWindow);
-        const endPage = Math.min(totalPages, currentPage + pageWindow);
-
-        if (startPage > 1) {
-            createButton("1", 1);
-            if (startPage > 2) {
-                const ellipsis = document.createElement("span");
-                ellipsis.className = "ellipsis";
-                ellipsis.textContent = "...";
-                nav.appendChild(ellipsis);
-            }
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            createButton(i, i, i === currentPage);
-        }
-
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                const ellipsis = document.createElement("span");
-                ellipsis.className = "ellipsis";
-                ellipsis.textContent = "...";
-                nav.appendChild(ellipsis);
-            }
-            createButton(totalPages, totalPages);
-        }
-
-        // Next button
-        createButton("Next", currentPage + 1, false, currentPage === totalPages);
-    }
-
-    renderPage(currentPage);
-}
-
-window.onload = function () {
-    paginateTable("artist-table", """ + str(ITEMS_PER_PAGE) + """);
-    paginateTable("track-table", """ + str(ITEMS_PER_PAGE) + """);
-    paginateTable("album-table", """ + str(ITEMS_PER_PAGE) + """);
-};
-</script>
-        """
+        return """<script>""" + print_file("scripts/scripts.js") +  """
+        window.onload = function () {
+            paginateTable("artist-table", """ + str(ITEMS_PER_PAGE) + """);
+            paginateTable("track-table", """ + str(ITEMS_PER_PAGE) + """);
+            paginateTable("album-table", """ + str(ITEMS_PER_PAGE) + """);
+        };
+        </script>"""
 
     def build_table(title, counts, table_id):
         if PLAYTIME_MODE:
-            MODE_STRING = "Time Listened (Hours:Minutes:Seconds)"
+            MODE_STRING = "Time Listened (Hours:Minutes:Seconds ms)"
             rows = "\n".join(
                 f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
                 for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
