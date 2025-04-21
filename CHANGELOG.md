@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] 2025-04-21
+### Added
+- New GUI for app that makes it easy to edit parameters without editing the config file.
+
+### Changed
+- `OUTPUT_FILE` no longer needs .html, and all created files will always be html.
+
+### Fixed
+- `MIN_MILLISECONDS` wasn't actually being used so this was fixed.
+
 ## [1.3.2] 2025-04-21
 ### Changed
 - Increase fade out time to one second so on small datasets it doesn't just look like the screen is flashing

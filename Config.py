@@ -16,8 +16,8 @@ INPUT_DIR = "sesh"
 
 
 # Name/path of the output file. If you don't change this it will be in the same folder
-#     as this script with the name summary.html
-OUTPUT_FILE = "summary.html"
+#     as this script with the name summary.html. No need to add the .html
+OUTPUT_FILE = "summary"
 
 
 # The number of items per table page.

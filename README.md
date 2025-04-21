@@ -7,41 +7,24 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
  - If you want to get a copy of your Spotify extended streaming history you can get it [HERE](https://www.spotify.com/us/account/privacy/)
  - I wrote this using python 3.11.6, but any recent version of python _should_ work.
 
-## Options
-In the `Config.py` file you can find configuration options and alter these options to your liking.
-
-- `PLAYTIME_MODE = True`
-  - How you want to rank the songs.
-    -  True: Ranked on how long you time listened to each Artist/Song/Album. 
-       - When True, the script ignores the `MIN_MILLISECONDS` value.
-    - False: Ranked on how many times you listened to each Artist/Song/Album.
-
-- `MIN_MILLISECONDS = 20000`
-  - Minimum number of milliseconds that you listened to the song.
-  - Changing this will drastically alter the final counts.
-
-- `INPUT_DIR = "sesh"`
-  - Directory, or folder, on your computer where your Spotify json files are located.
-  - Easiest method is to just put them in the sesh folder.
-
-- `OUTPUT_FILE = "summary.html"`
-  - Name/path of the output file. If you don't change this it will be in the same folder
-  - as this script with the name summary.html
-
-- `ITEMS_PER_PAGE = 10`
-  - The number of items per table page.
+![Image](https://github.com/user-attachments/assets/bdbe03ff-fc2f-45aa-afb1-e548a675f36a)
 
 ## Running
  - Just run the script using `python.exe .\GenerateHTMLSummary.py`  
-   - You should see the response `✅ HTML report generated: summary.html`
- - After that just open the `summary.html` file or whatever you named it
-
-![Image](https://github.com/user-attachments/assets/32bd114e-822e-42bd-8b07-69e143ef10e6)
+   - A gui like the one below will pop up. 
+   - ![Image](https://github.com/user-attachments/assets/bdbe03ff-fc2f-45aa-afb1-e548a675f36a)
+ - After altering the settings to your liking, click "Generate Summary"
+   - You should get a confirmation screen like so, clicking "Open Report" _should_ open it in your web browser.
+   - ![Image](https://github.com/user-attachments/assets/9804fe5d-7e23-4a8d-a02e-528ede041b65)
+   - The file will have generated in the same folder as the script, if you wish to revisit it later.
+ - If you wish to change the default settings they are found in the `Config.py` file.
+   - You can also run the script like so `python.exe .\GenerateHTMLSummary.py True`
+   - It will skip the GUI and just generate the report with the values in `Config.py`
 
 
 ## IMPORTANT NOTES
-- When you first open the html page it will take a few seconds to render pagination (the multiple pages for tables). Just wait until you see the page update and everything will work smoothly.
-- The resulting `summary.html` file can be shared without any of the other scripts or style files as it is all built into it.
+- When you first open the html page it can take a few seconds to render pagination (the multiple pages for tables). Just wait until you see the page update and everything will work smoothly.
+- The resulting `.html` file can be shared without any of the other scripts or style files as everything is all built into it.
 - None of your data ever leaves your system or is uploaded anywhere, this all stays on your machine.
 
 ## Images

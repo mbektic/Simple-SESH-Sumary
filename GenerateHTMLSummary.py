@@ -1,10 +1,10 @@
 import json
-import os
-from Config import *
+import sys
+from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.3.2"
+VERSION = "1.4.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -46,10 +46,16 @@ def print_styles():
     """
 
 
-def count_plays_from_directory(input_dir, output_html):
+def count_plays_from_directory(config):
     artist_counts = defaultdict(int)
     track_counts = defaultdict(int)
     album_counts = defaultdict(int)
+
+    PLAYTIME_MODE = config.PLAYTIME_MODE
+    MIN_MILLISECONDS = config.MIN_MILLISECONDS
+    input_dir = config.INPUT_DIR
+    output_html = config.OUTPUT_FILE + ".html"
+    ITEMS_PER_PAGE = config.ITEMS_PER_PAGE
 
     json_files = [
         os.path.join(input_dir, filename)
@@ -71,7 +77,7 @@ def count_plays_from_directory(input_dir, output_html):
 
         for entry in data:
             if entry.get("ms_played") is not None:
-                if (entry.get("ms_played") > 20000 or PLAYTIME_MODE) and entry.get("master_metadata_album_artist_name"):
+                if (entry.get("ms_played") > MIN_MILLISECONDS or PLAYTIME_MODE) and entry.get("master_metadata_album_artist_name"):
                     artist = entry.get("master_metadata_album_artist_name")
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
@@ -167,4 +173,12 @@ def count_plays_from_directory(input_dir, output_html):
     print(f"✅ HTML report generated: {output_html}")
 
 
-count_plays_from_directory(INPUT_DIR, OUTPUT_FILE)
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1].lower() == 'true':
+        config = load_config()
+        count_plays_from_directory(config)
+    else:
+        root = tk.Tk()
+        app = ConfigApp(root)
+        load_style(root)
+        root.mainloop()
