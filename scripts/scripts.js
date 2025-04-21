@@ -1,3 +1,25 @@
+const themeStyle = document.getElementById("theme-style");
+const currentTheme = localStorage.getItem("theme") || "dark";
+themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
+
+window.onload = () => {
+    const overlay = document.getElementById('loading-overlay');
+
+    requestAnimationFrame(() => {
+        paginateTable("artist-table", ITEMS_PER_PAGE);
+        paginateTable("track-table", ITEMS_PER_PAGE);
+        paginateTable("album-table", ITEMS_PER_PAGE);
+
+        // Trigger the fade-out
+        overlay.classList.add('fade-out');
+
+        // Remove from layout after transition
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
+    });
+};
+
 function paginateTable(tableId, pageSize) {
     const table = document.getElementById(tableId);
     const tbody = table.querySelector("tbody");
@@ -81,18 +103,14 @@ function paginateTable(tableId, pageSize) {
     renderPage(currentPage);
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.getElementById("theme-toggle");
-  const themeStyle = document.getElementById("theme-style");
+    const toggle = document.getElementById("theme-toggle");
+    toggle.checked = currentTheme === "dark";
 
-  const currentTheme = localStorage.getItem("theme") || "{'dark' if DARK_MODE else 'light'}";
-  themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
-  toggle.checked = currentTheme === "dark";
-
-  toggle.addEventListener("change", () => {
-    const isDark = toggle.checked;
-    themeStyle.textContent = isDark ? DARK_CSS : LIGHT_CSS;
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
+    toggle.addEventListener("change", () => {
+        const isDark = toggle.checked;
+        themeStyle.textContent = isDark ? DARK_CSS : LIGHT_CSS;
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
 })
+

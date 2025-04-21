@@ -4,7 +4,7 @@ from Config import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -92,12 +92,9 @@ def count_plays_from_directory(input_dir, output_html):
                             album_counts[album] += 1
 
     def generate_js():
-        return """<script>""" + print_file("scripts/scripts.js") + """
-        window.onload = function () {
-            paginateTable("artist-table", """ + str(ITEMS_PER_PAGE) + """);
-            paginateTable("track-table", """ + str(ITEMS_PER_PAGE) + """);
-            paginateTable("album-table", """ + str(ITEMS_PER_PAGE) + """);
-        };
+        return """<script>
+        const ITEMS_PER_PAGE =  """ + str(ITEMS_PER_PAGE) + """
+        """ + print_file("scripts/scripts.js") + """
         </script>"""
 
     def build_table(title, counts, table_id):
@@ -115,11 +112,11 @@ def count_plays_from_directory(input_dir, output_html):
             )
 
         # Clean title for column header (remove emoji and trim spacing)
-        clean_title = title[2:-1] if title.startswith("🎤") or title.startswith("🎶") or title.startswith("💿") else title
+        clean_title = title[2:]
 
         return f"""
         <h2>{title}</h2>
-        <input type="text" id="{table_id}-search" placeholder="Search {clean_title}..." class="search-input" />
+        <input type="text" id="{table_id}-search" placeholder="Search for {clean_title}..." class="search-input" />
         <table id="{table_id}">
             <thead>
                 <tr><th>Rank</th><th>{clean_title}</th><th>{MODE_STRING}</th></tr>
@@ -132,6 +129,7 @@ def count_plays_from_directory(input_dir, output_html):
         """
 
     html_content = f"""
+    <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
@@ -140,6 +138,11 @@ def count_plays_from_directory(input_dir, output_html):
         {generate_js()}
     </head>
     <body>
+        <div id="loading-overlay">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading…</div>
+        </div>
+        
         <h1>Spotify Streaming History</h1>
         {build_table("🎤 Artists", artist_counts, "artist-table")}
         {build_table("🎶 Tracks", track_counts, "track-table")}

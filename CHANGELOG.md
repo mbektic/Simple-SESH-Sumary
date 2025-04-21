@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] 2025-04-21
+### Added
+- Loading screen while the tables are paginating.
+- Added missing `<!DOCTYPE html>` to get rid of annoying warning
+
+### Changed
+- Move `window.onload` function to `scripts.js`
+- Text changes for search boxes and second table column.
+
+### Fixed
+- Fixed weird behaviors setting default theme and loading selected theme
+
 ## [1.3.0] 2025-04-21
 ### Added
 - Search functionality.
