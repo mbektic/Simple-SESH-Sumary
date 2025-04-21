@@ -31,7 +31,7 @@ function paginateTable(tableId, pageSize) {
         createButton("Prev", currentPage - 1, false, currentPage === 1);
 
         // Page buttons
-        const pageWindow = 2;
+        const pageWindow = 1;
         const startPage = Math.max(1, currentPage - pageWindow);
         const endPage = Math.min(totalPages, currentPage + pageWindow);
 

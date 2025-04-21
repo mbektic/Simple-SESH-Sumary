@@ -26,7 +26,12 @@ tr td:nth-of-type(2) {
   width: 60%;
 }
 
+tr td:nth-of-type(3) {
+  text-align: center;
+}
+
 th {
+    text-align: center;
     background-color: darkred;
     color: #e0e0e0;
 }
@@ -74,4 +79,28 @@ a, a:visited {
 .pagination .ellipsis {
     padding: 6px 8px;
     color: #aaa;
+}
+
+@media only screen and (max-width: 1024px) {
+    h1, h2 {
+        font-size: 45pt;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    tr, #version-link {
+        font-size: xx-large;
+    }
+
+    .pagination button {
+        font-size: xxx-large;
+    }
+
+    footer {
+        width: 100%;
+        text-align: center;
+        margin-top: 64px;
+    }
 }

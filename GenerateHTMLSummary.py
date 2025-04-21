@@ -1,23 +1,18 @@
 import json
 import os
+import Config
 from collections import defaultdict
 
-VERSION = "1.2.2"
 
-# How you want to rank the songs. If True, it will base the rankings on how long you listened to the track/artist/album. This also ignores the `MIN_MILLISECONDS` FLAG
-PLAYTIME_MODE = False
-# Minimum number of milliseconds that you listened to the song. Changing this can drastically alter counts
-MIN_MILLISECONDS = 20000
-# Directory where your json files are, easyist method is to just drop them in the sesh folder.
-INPUT_DIR = "sesh"
-# Name/path of the output file. if you don't change this it will be in the same folder as this script with the name summary.html
-OUTPUT_FILE = "summary.html"
-# The number of items per table page.
-ITEMS_PER_PAGE = 10
-# If you want the result to be styled with darker colors. (See screenshots on the GitHub page)
-DARK_MODE = True
+PLAYTIME_MODE = Config.PLAYTIME_MODE
+MIN_MILLISECONDS = Config.MIN_MILLISECONDS
+INPUT_DIR = Config.INPUT_DIR
+OUTPUT_FILE = Config.OUTPUT_FILE
+ITEMS_PER_PAGE = Config.ITEMS_PER_PAGE
+DARK_MODE = Config.DARK_MODE
 
-
+# The script version. You can check the changelog at the GitHub URL to see if there is a new version.
+VERSION = "1.2.3"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 def ms_to_hms(ms):
@@ -101,7 +96,7 @@ def count_plays_from_directory(input_dir, output_html):
 
     def build_table(title, counts, table_id):
         if PLAYTIME_MODE:
-            MODE_STRING = "Playtime (Hours:Minutes:Seconds ms)"
+            MODE_STRING = "Playtime H:M:S ms"
             rows = "\n".join(
                 f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
                 for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
@@ -116,7 +111,7 @@ def count_plays_from_directory(input_dir, output_html):
         <h2>{title}</h2>
         <table id="{table_id}">
             <thead>
-                <tr><th>Rank</th><th>Name</th><th>{MODE_STRING}</th></tr>
+                <tr><th>Rank</th><th>{title[2:-1]}</th><th>{MODE_STRING}</th></tr>
             </thead>
             <tbody>
                 {rows}
@@ -142,7 +137,7 @@ def count_plays_from_directory(input_dir, output_html):
         {build_table("💿 Albums", album_counts, "album-table")}
     </body>
     <footer>
-      <a href="{GITHUB_URL}">Version: {VERSION}</a>
+      <a id="version-link" href="{GITHUB_URL}">Version: {VERSION}</a>
     </footer>
     </html>
     """
