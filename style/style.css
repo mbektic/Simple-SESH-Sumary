@@ -179,7 +179,7 @@ a, a:visited {
 
 
 /****************************
-* FULL‑SCREEN LOADING OVERLAY
+* FULLSCREEN LOADING OVERLAY
 *****************************/
 #loading-overlay {
     position: fixed;
@@ -194,7 +194,7 @@ a, a:visited {
     z-index: 9999;
     opacity: 1;
     pointer-events: auto;
-    transition: opacity 0.3s ease;
+    transition: opacity 1s ease;
     will-change: opacity;
 }
 
@@ -207,10 +207,12 @@ a, a:visited {
     border: 8px solid rgba(255, 255, 255, 0.3);
     border-top: 8px solid red;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 20vw;
+    height: 20vw;
+    max-width: 100px;
+    max-height: 100px;
     animation: spin 1s linear infinite;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 @keyframes spin {
@@ -279,5 +281,16 @@ a, a:visited {
 
     .theme-toggle .icon {
         font-size: 20px;
+    }
+
+    .loading-text {
+        font-size: xxx-large;
+    }
+
+    .spinner {
+        border: 16px solid rgba(255, 255, 255, 0.3);
+        border-top: 16px solid red;
+        max-width: unset;
+        max-height: unset;
     }
 }

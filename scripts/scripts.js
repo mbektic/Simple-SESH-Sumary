@@ -12,11 +12,6 @@ window.onload = () => {
 
         // Trigger the fade-out
         overlay.classList.add('fade-out');
-
-        // Remove from layout after transition
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 300);
     });
 };
 
