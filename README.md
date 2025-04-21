@@ -29,12 +29,7 @@ In the `Config.py` file you can find configuration options and alter these optio
   - as this script with the name summary.html
 
 - `ITEMS_PER_PAGE = 10`
-  - The number of items per table page. 
-
-- `DARK_MODE = False`
-  - If you want the result to be a dark theme or light (See screenshots below)
-    - True: Dark Theme on
-    - False: Dark Theme off
+  - The number of items per table page.
 
 ## Running
  - Just run the script using `python.exe .\GenerateHTMLSummary.py`  
@@ -49,18 +44,15 @@ In the `Config.py` file you can find configuration options and alter these optio
 - The resulting `summary.html` file can be shared without any of the other scripts or style files as it is all built into it.
 - None of your data ever leaves your system or is uploaded anywhere, this all stays on your machine.
 
+## Images
+### Artist (Dark Mode and Play Time Mode False)
+![Image](https://github.com/user-attachments/assets/6f6a0e29-e55f-4653-a7a8-5347242712be)
 
-### Artist (Dark Mode True and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/cf98a426-ac6c-48b1-b21b-a53e35322d62)
+### Tracks (Dark Mode and Play Time Mode True)
+![Image](https://github.com/user-attachments/assets/1f762850-4ee1-4fd5-94c3-5a9f47f70cef)
 
-### Tracks (Dark Mode True and Play Time Mode True)
-![Image](https://github.com/user-attachments/assets/d575b7f9-7b61-43a5-9785-4a116a88ed50)
+### Albums (Light Mode and Play Time Mode False)
+![Image](https://github.com/user-attachments/assets/d895f6ea-8a90-4c9f-9ed6-f7753bc59cb7)
 
-### Albums (Dark Mode False and Play Time Mode False)
-![Image](https://github.com/user-attachments/assets/4cff5ae1-0ba6-409c-a7af-731958900921)
-
-
-### Conclusion/Rambling
-This originally started with me trying to upload historic data to last.fm, but since you cant scrobble anything older than two weeks, and I didn't want to mess up the dates on my music, I decided against that. Anyway, I might add more to this if anyone actually uses it but who knows.
-
-[My Last.fm, Say hi!](https://www.last.fm/user/Mbektic)
+### Search
+![Image](https://github.com/user-attachments/assets/4f78775f-5420-4ff8-be78-3fcacc7c8fe6)

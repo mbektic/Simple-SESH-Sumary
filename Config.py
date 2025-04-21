@@ -22,10 +22,3 @@ OUTPUT_FILE = "summary.html"
 
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
-
-
-# If you want the result to be a dark theme or light
-#      True: Dark Theme on
-#     False: Dark Theme off
-#     (See screenshots here: https://github.com/mbektic/Simple-SESH-Sumary)
-DARK_MODE = True

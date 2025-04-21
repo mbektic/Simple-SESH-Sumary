@@ -1,5 +1,6 @@
 body {
     background: #f4f4f9;
+    color: #333;
 }
 
 body,
@@ -13,4 +14,18 @@ table {
 
 tr:hover {
     background-color: #f1f1f1;
+}
+
+.search-input {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.search-input:focus {
+    border-color: #007bff;
+}
+
+th, td, a{
+    font-weight: bold;
 }

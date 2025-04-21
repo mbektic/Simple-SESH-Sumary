@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] 2025-04-21
+### Added
+- Search functionality.
+- Added a dark_mode toggle button. 
+
+### Changed
+- Rewrote the pagination functions to drastically improve render time. 8-10 seconds with my full data to about 3 in firefox, 1 second in chromium based browsers. 
+- Redid the light theme to make it a better along with some other minor styling changes.
+- Imported * from config to clean up code.
+- Changed Page Title to "Spotify Streaming History"
+
+### Removed
+- Removed `DARK_MODE` config option
+
 ## [1.2.3] 2025-04-21
 ### Added 
 - Mobile Styling

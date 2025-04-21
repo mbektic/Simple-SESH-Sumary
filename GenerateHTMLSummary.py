@@ -1,19 +1,12 @@
 import json
 import os
-import Config
+from Config import *
 from collections import defaultdict
 
-
-PLAYTIME_MODE = Config.PLAYTIME_MODE
-MIN_MILLISECONDS = Config.MIN_MILLISECONDS
-INPUT_DIR = Config.INPUT_DIR
-OUTPUT_FILE = Config.OUTPUT_FILE
-ITEMS_PER_PAGE = Config.ITEMS_PER_PAGE
-DARK_MODE = Config.DARK_MODE
-
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.2.3"
+VERSION = "1.3.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
+
 
 def ms_to_hms(ms):
     seconds = ms // 1000
@@ -23,20 +16,34 @@ def ms_to_hms(ms):
     milliseconds = ms - (hours * 60 * 60 * 1000) - (minutes * 60 * 1000) - (seconds * 1000)
     return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds}ms"
 
+
 def print_file(path):
     with open(path, 'r') as file:
         contents = file.read()
     return contents
 
-def print_styles():
-    styles = ""
-    styles += print_file("style/style.css")
-    if DARK_MODE:
-        styles += print_file("style/dark.css")
-    else:
-        styles += print_file("style/light.css")
 
-    return styles
+def escape_js_string(s):
+    return s.replace("\\", "\\\\").replace("`", "\\`")
+
+
+def print_styles():
+    base_style = print_file("style/style.css")
+    dark_style = print_file("style/dark.css")
+    light_style = print_file("style/light.css")
+
+    return f"""
+    <style id="base-style">
+        {base_style}
+    </style>
+    <style id="theme-style">
+        {dark_style}
+    </style>
+    <script>
+        const DARK_CSS = `{escape_js_string(dark_style)}`;
+        const LIGHT_CSS = `{escape_js_string(light_style)}`;
+    </script>
+    """
 
 
 def count_plays_from_directory(input_dir, output_html):
@@ -64,11 +71,10 @@ def count_plays_from_directory(input_dir, output_html):
 
         for entry in data:
             if entry.get("ms_played") is not None:
-                if (entry.get("ms_played") > 20000 or PLAYTIME_MODE) and  entry.get("master_metadata_album_artist_name"):
+                if (entry.get("ms_played") > 20000 or PLAYTIME_MODE) and entry.get("master_metadata_album_artist_name"):
                     artist = entry.get("master_metadata_album_artist_name")
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
-
 
                     if PLAYTIME_MODE and entry.get("ms_played") > 0:
                         if artist:
@@ -86,7 +92,7 @@ def count_plays_from_directory(input_dir, output_html):
                             album_counts[album] += 1
 
     def generate_js():
-        return """<script>""" + print_file("scripts/scripts.js") +  """
+        return """<script>""" + print_file("scripts/scripts.js") + """
         window.onload = function () {
             paginateTable("artist-table", """ + str(ITEMS_PER_PAGE) + """);
             paginateTable("track-table", """ + str(ITEMS_PER_PAGE) + """);
@@ -107,11 +113,16 @@ def count_plays_from_directory(input_dir, output_html):
                 f"<tr><td>{rank}</td><td>{name}</td><td>{count}</td></tr>"
                 for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
             )
+
+        # Clean title for column header (remove emoji and trim spacing)
+        clean_title = title[2:-1] if title.startswith("🎤") or title.startswith("🎶") or title.startswith("💿") else title
+
         return f"""
         <h2>{title}</h2>
+        <input type="text" id="{table_id}-search" placeholder="Search {clean_title}..." class="search-input" />
         <table id="{table_id}">
             <thead>
-                <tr><th>Rank</th><th>{title[2:-1]}</th><th>{MODE_STRING}</th></tr>
+                <tr><th>Rank</th><th>{clean_title}</th><th>{MODE_STRING}</th></tr>
             </thead>
             <tbody>
                 {rows}
@@ -125,19 +136,25 @@ def count_plays_from_directory(input_dir, output_html):
     <head>
         <meta charset="UTF-8">
         <title>Play Counts Summary</title>
-        <style>
-            {print_styles()}
-        </style>
+        {print_styles()}
         {generate_js()}
     </head>
     <body>
-        <h1>Spotify Extend Streaming History Summary</h1>
+        <h1>Spotify Streaming History</h1>
         {build_table("🎤 Artists", artist_counts, "artist-table")}
         {build_table("🎶 Tracks", track_counts, "track-table")}
         {build_table("💿 Albums", album_counts, "album-table")}
     </body>
     <footer>
       <a id="version-link" href="{GITHUB_URL}">Version: {VERSION}</a>
+          <div class="theme-toggle-wrapper">
+          <input type="checkbox" id="theme-toggle" />
+          <label for="theme-toggle" class="theme-toggle">
+            <span class="icon sun">☀️</span>
+            <span class="icon moon">🌙</span>
+            <span class="ball"></span>
+          </label>
+        </div>
     </footer>
     </html>
     """
@@ -146,6 +163,5 @@ def count_plays_from_directory(input_dir, output_html):
         f.write(html_content)
     print(f"✅ HTML report generated: {output_html}")
 
-# Example usage:
-# Replace "your_directory_path" with the path to your folder with JSON files
+
 count_plays_from_directory(INPUT_DIR, OUTPUT_FILE)
