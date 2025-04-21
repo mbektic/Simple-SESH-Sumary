@@ -7,12 +7,11 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
  - If you want to get a copy of your Spotify extended streaming history you can get it [HERE](https://www.spotify.com/us/account/privacy/)
  - I wrote this using python 3.11.6, but any recent version of python _should_ work.
 
-![Image](https://github.com/user-attachments/assets/bdbe03ff-fc2f-45aa-afb1-e548a675f36a)
 
 ## Running
  - Just run the script using `python.exe .\GenerateHTMLSummary.py`  
    - A gui like the one below will pop up. 
-   - ![Image](https://github.com/user-attachments/assets/bdbe03ff-fc2f-45aa-afb1-e548a675f36a)
+   - ![Image](https://github.com/user-attachments/assets/25ff7142-2663-4295-826f-a9be0070e088)
  - After altering the settings to your liking, click "Generate Summary"
    - You should get a confirmation screen like so, clicking "Open Report" _should_ open it in your web browser.
    - ![Image](https://github.com/user-attachments/assets/9804fe5d-7e23-4a8d-a02e-528ede041b65)
