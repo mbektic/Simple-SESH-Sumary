@@ -1,6 +1,7 @@
 const themeStyle = document.getElementById("theme-style");
 const currentTheme = localStorage.getItem("theme") || "dark";
 themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
+const originalRowCache = {};
 
 window.onload = () => {
     const overlay = document.getElementById('loading-overlay');
@@ -16,12 +17,17 @@ window.onload = () => {
 };
 
 function paginateTable(tableId, pageSize) {
-    const table = document.getElementById(tableId);
-    const tbody = table.querySelector("tbody");
+    const mode = document.querySelector(`#${tableId}-playcount`).style.display !== 'none' ? 'playcount' : 'playtime';
+    const visibleTable = document.querySelector(`#${tableId}-${mode} table`);
+    const tbody = visibleTable.querySelector("tbody");
     const searchInput = document.getElementById(`${tableId}-search`);
+    const cacheKey = `${tableId}-${mode}`;
 
-    // Cache original full dataset as cloned rows
-    const originalRows = Array.from(tbody.querySelectorAll("tr")).map(tr => tr.cloneNode(true));
+    if (!originalRowCache[cacheKey]) {
+        originalRowCache[cacheKey] = Array.from(tbody.querySelectorAll("tr")).map(tr => tr.cloneNode(true));
+    }
+
+    const originalRows = originalRowCache[cacheKey];
     let filteredRows = [...originalRows];
     let currentPage = 1;
 
@@ -88,7 +94,6 @@ function paginateTable(tableId, pageSize) {
         renderPage(1);
     }
 
-    // Hook up search input
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             applySearch(searchInput.value);
@@ -99,6 +104,7 @@ function paginateTable(tableId, pageSize) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Theme mode toggle
     const toggle = document.getElementById("theme-toggle");
     toggle.checked = currentTheme === "dark";
 
@@ -107,5 +113,57 @@ document.addEventListener("DOMContentLoaded", () => {
         themeStyle.textContent = isDark ? DARK_CSS : LIGHT_CSS;
         localStorage.setItem("theme", isDark ? "dark" : "light");
     });
+
+    // Global mode toggle
+    const modeToggle = document.getElementById("global-mode-toggle");
+    const modeToggleText = document.getElementById(`mode-toggle-label`)
+    ;
+    modeToggle.addEventListener("change", () => {
+        const newMode = modeToggle.checked ? "playtime" : "playcount";
+
+        ["artist-table", "track-table", "album-table"].forEach(tableId => {
+            switchMode(tableId, newMode);
+        });
+
+        modeToggleText.textContent = modeToggle.checked ? "Switch to Playcount:" : "Switch to Playtime:";
+    });
 })
 
+
+function switchMode(tableId, mode) {
+    const playcountDiv = document.getElementById(`${tableId}-playcount`);
+    const playtimeDiv = document.getElementById(`${tableId}-playtime`);
+
+    if (mode === 'playcount') {
+        playcountDiv.style.display = 'block';
+        playtimeDiv.style.display = 'none';
+    } else {
+        playcountDiv.style.display = 'none';
+        playtimeDiv.style.display = 'block';
+    }
+
+    paginateTable(tableId, ITEMS_PER_PAGE);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const settingsBtn = document.getElementById("settings-button");
+    const modal = document.getElementById("settings-modal");
+    const closeBtn = document.getElementById("close-settings");
+
+    // Open modal
+    settingsBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    // Close modal when close button is clicked
+    closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    // Close modal if clicked outside of modal content
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+});

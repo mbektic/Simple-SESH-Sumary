@@ -5,21 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.0] 2025-04-21
+## [1.5.0] 2025-04-22
 ### Added
-- New GUI for app that makes it easy to edit parameters without editing the config file.
+- New header bar with a settings menu and moved the dark theme slide and the play mode switch under it. 
 
 ### Changed
-- `OUTPUT_FILE` no longer needs .html, and all created files will always be html.
+- Moved the `PLAYTIME_MODE` setting into the app instead of a config option so one resulting page can view both.
+- Switched to spotify green instead of red.
+- Moved some of the HTML to its own file `html/settings_moda.html` to make the project easier to manage. I want to move more in the future. 
+- Update `print_file()` function to be able to handle emojis 
+
+### Removed
+- `PLAYTIME_MODE` setting was removed from the config and the GUI
+- The fancy dark mode slider had to go, it was nice looking but a pain in the behind. 
+
+## [1.4.0] 2025-04-21
+### Added
+- New GUI for the app that makes it easy to edit parameters without editing the config file.
+
+### Changed
+- `OUTPUT_FILE` no longer needs .html, and all created files will always be HTML.
 
 ### Fixed
-- `MIN_MILLISECONDS` wasn't actually being used so this was fixed.
+- `MIN_MILLISECONDS` wasn't being used so this was fixed.
 
 ## [1.3.2] 2025-04-21
 ### Changed
-- Increase fade out time to one second so on small datasets it doesn't just look like the screen is flashing
-- Size of loading text and spinner was updated.
-- No longer remove loading screen from the layout incase I need it again. 
+- Increase fade out time to one second, so on small datasets it doesn't just look like the screen is flashing
+- The size of the loading text and spinner was updated.
+- No longer remove the loading screen from the layout incase I need it again. 
 
 ## [1.3.1] 2025-04-21
 ### Added
@@ -28,10 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Move `window.onload` function to `scripts.js`
-- Text changes for search boxes and second table column.
+- Text changes for search boxes and the second table column.
 
 ### Fixed
-- Fixed weird behaviors setting default theme and loading selected theme
+- Fixed weird behaviors setting the default theme and loading the selected theme
 
 ## [1.3.0] 2025-04-21
 ### Added
@@ -39,8 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a dark_mode toggle button. 
 
 ### Changed
-- Rewrote the pagination functions to drastically improve render time. 8-10 seconds with my full data to about 3 in firefox, 1 second in chromium based browsers. 
-- Redid the light theme to make it a better along with some other minor styling changes.
+- Rewrote the pagination functions to drastically improve render time. 8–10 seconds with my full data to about 3 in firefox, 1 second in chromium-based browsers. 
+- Redid the light theme to make it better along with some other minor styling changes.
 - Imported * from config to clean up code.
 - Changed Page Title to "Spotify Streaming History"
 
@@ -63,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.1] 2025-04-20
 ### Changed
-- Javascript was moved to its own file to make it easier to edit.
+- JavaScript was moved to its own file to make it easier to edit.
 - Added milliseconds to playtime mode.
 
 ### Fixed
@@ -74,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New dark mode option
 
 ### Changed 
-- Styles are now in css files to make them easier to manage, with three files `stlye.css`, `light.css` and `dark.css`
+- Styles are now in CSS files to make them easier to manage, with three files `stlye.css`, `light.css` and `dark.css`
 - General styling changes for readability.
 - Updated `README.md`
 
@@ -96,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added a new `PLAYTIME_MODE` flag that will make the script generate the ranking based off of milliseconds listened instead of raw playcount.
 - Added `CHANGELOG.md`
-- Added a version number to bottom of the HTML page so users can quickly see what version they are using and if there's a new one available
+- Added a version number to the bottom of the HTML page so users can quickly see what version they are using and if there's a new one available
 
 ### Changed
 - Minor Style changes.

@@ -37,7 +37,6 @@ class ConfigApp:
         self.root = root
         root.title("SESH Summary Config - V:" + VERSION)
 
-        self.playtime_var = tk.BooleanVar(value=config.PLAYTIME_MODE)
         self.min_millis_var = tk.IntVar(value=config.MIN_MILLISECONDS)
         self.input_dir_var = tk.StringVar(value=config.INPUT_DIR)
         self.output_file_var = tk.StringVar(value=config.OUTPUT_FILE)
@@ -47,23 +46,6 @@ class ConfigApp:
 
     def build_ui(self):
         padding = {'padx': 10, 'pady': 5}
-
-        # Playback Mode Section
-        mode_frame = ttk.LabelFrame(self.root, text="How to Rank")
-        mode_frame.grid(row=0, column=0, sticky="ew", **padding)
-
-        ttk.Checkbutton(
-            mode_frame,
-            text="Use total playtime instead of number of plays",
-            variable=self.playtime_var,
-            command=self.toggle_millis_field
-        ).pack(anchor="w", padx=10, pady=5)
-
-        ttk.Label(
-            mode_frame,
-            text="Checked: Ranked by how long you listened to each Artist/Song/Album\n"
-                 "Unchecked: Ranked by how many times you listened"
-        ).pack(anchor="w", padx=10)
 
         # Minimum Milliseconds (hidden if playtime mode is on)
         self.millis_frame = ttk.LabelFrame(self.root, text="Minimum Milliseconds")
@@ -115,17 +97,8 @@ class ConfigApp:
         # Run Button
         ttk.Button(self.root, text="Generate Summary", command=self.run).grid(row=5, column=0, pady=15)
 
-        self.toggle_millis_field()
-
-    def toggle_millis_field(self):
-        if self.playtime_var.get():
-            self.millis_frame.grid_remove()
-        else:
-            self.millis_frame.grid()
-
     def run(self):
         # Update config values from UI
-        config.PLAYTIME_MODE = self.playtime_var.get()
         config.MIN_MILLISECONDS = int(self.min_millis_var.get())
         config.INPUT_DIR = self.input_dir_var.get()
         config.OUTPUT_FILE = self.output_file_var.get()

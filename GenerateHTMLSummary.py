@@ -4,7 +4,7 @@ from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.4.0"
+VERSION = "1.5.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -18,8 +18,13 @@ def ms_to_hms(ms):
 
 
 def print_file(path):
-    with open(path, 'r') as file:
-        contents = file.read()
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            contents = file.read()
+    except UnicodeDecodeError:
+        # If utf-8 fails, you can fall back to 'utf-8-sig' or another encoding like 'latin-1'
+        with open(path, 'r', encoding='utf-8-sig') as file:
+            contents = file.read()
     return contents
 
 
@@ -50,8 +55,10 @@ def count_plays_from_directory(config):
     artist_counts = defaultdict(int)
     track_counts = defaultdict(int)
     album_counts = defaultdict(int)
+    artist_time = defaultdict(int)
+    track_time = defaultdict(int)
+    album_time = defaultdict(int)
 
-    PLAYTIME_MODE = config.PLAYTIME_MODE
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
     output_html = config.OUTPUT_FILE + ".html"
@@ -77,25 +84,23 @@ def count_plays_from_directory(config):
 
         for entry in data:
             if entry.get("ms_played") is not None:
-                if (entry.get("ms_played") > MIN_MILLISECONDS or PLAYTIME_MODE) and entry.get("master_metadata_album_artist_name"):
+                if entry.get("master_metadata_album_artist_name"):
                     artist = entry.get("master_metadata_album_artist_name")
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
 
-                    if PLAYTIME_MODE and entry.get("ms_played") > 0:
-                        if artist:
-                            artist_counts[artist] += entry.get("ms_played")
-                        if track:
-                            track_counts[track] += entry.get("ms_played")
-                        if album:
-                            album_counts[album] += entry.get("ms_played")
-                    else:
-                        if artist:
+                    if artist:
+                        if entry.get("ms_played") > MIN_MILLISECONDS:
                             artist_counts[artist] += 1
-                        if track:
+                        artist_time[artist] += entry.get("ms_played")
+                    if track:
+                        if entry.get("ms_played") > MIN_MILLISECONDS:
                             track_counts[track] += 1
-                        if album:
+                        track_time[track] += entry.get("ms_played")
+                    if album:
+                        if entry.get("ms_played") > MIN_MILLISECONDS:
                             album_counts[album] += 1
+                        album_time[album] += entry.get("ms_played")
 
     def generate_js():
         return """<script>
@@ -103,34 +108,43 @@ def count_plays_from_directory(config):
         """ + print_file("scripts/scripts.js") + """
         </script>"""
 
-    def build_table(title, counts, table_id):
-        if PLAYTIME_MODE:
-            MODE_STRING = "Playtime H:M:S ms"
-            rows = "\n".join(
-                f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
-                for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
-            )
-        else:
-            MODE_STRING = "Plays"
-            rows = "\n".join(
-                f"<tr><td>{rank}</td><td>{name}</td><td>{count}</td></tr>"
-                for rank, (name, count) in enumerate(sorted(counts.items(), key=lambda x: x[1], reverse=True), start=1)
-            )
+    def build_table(title, playtime_counts, playcount_counts, table_id):
+        clean_title = title[2:]  # Remove emoji
+        mode_string_playtime = "Playtime H:M:S ms"
+        mode_string_playcount = "Plays"
 
-        # Clean title for column header (remove emoji and trim spacing)
-        clean_title = title[2:]
+        # Playtime rows
+        playtime_rows = "\n".join(
+            f"<tr><td>{rank}</td><td>{name}</td><td>{ms_to_hms(count)}</td></tr>"
+            for rank, (name, count) in
+            enumerate(sorted(playtime_counts.items(), key=lambda x: x[1], reverse=True), start=1)
+        )
+
+        # Play count rows
+        playcount_rows = "\n".join(
+            f"<tr><td>{rank}</td><td>{name}</td><td>{count}</td></tr>"
+            for rank, (name, count) in
+            enumerate(sorted(playcount_counts.items(), key=lambda x: x[1], reverse=True), start=1)
+        )
 
         return f"""
         <h2>{title}</h2>
         <input type="text" id="{table_id}-search" placeholder="Search for {clean_title}..." class="search-input" />
-        <table id="{table_id}">
-            <thead>
-                <tr><th>Rank</th><th>{clean_title}</th><th>{MODE_STRING}</th></tr>
-            </thead>
-            <tbody>
-                {rows}
-            </tbody>
-        </table>
+
+        <div id="{table_id}-playcount" style="display: none;">
+            <table>
+                <thead><tr><th>Rank</th><th>{clean_title}</th><th>{mode_string_playcount}</th></tr></thead>
+                <tbody>{playcount_rows}</tbody>
+            </table>
+        </div>
+
+        <div id="{table_id}-playtime">
+            <table>
+                <thead><tr><th>Rank</th><th>{clean_title}</th><th>{mode_string_playtime}</th></tr></thead>
+                <tbody>{playtime_rows}</tbody>
+            </table>
+        </div>
+
         <div class="pagination" id="{table_id}-nav"></div>
         """
 
@@ -144,26 +158,31 @@ def count_plays_from_directory(config):
         {generate_js()}
     </head>
     <body>
-        <div id="loading-overlay">
-          <div class="spinner"></div>
-          <div class="loading-text">Loading…</div>
+            <div id="title-bar">
+            <h1>Spotify Streaming History</h1>
+            <div class="title-controls">
+            <button id="settings-button" title="Settings" aria-label="Settings" style="background: none; border: none; cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+            </div>
         </div>
         
-        <h1>Spotify Streaming History</h1>
-        {build_table("🎤 Artists", artist_counts, "artist-table")}
-        {build_table("🎶 Tracks", track_counts, "track-table")}
-        {build_table("💿 Albums", album_counts, "album-table")}
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading…</div>
+        </div>
+        
+        {build_table("🎤 Artists", artist_time, artist_counts, "artist-table")}
+        {build_table("🎶 Tracks", track_time, track_counts, "track-table")}
+        {build_table("💿 Albums", album_time, album_counts, "album-table")}
+        
+        {print_file("html/settings_modal.html")}
     </body>
     <footer>
       <a id="version-link" href="{GITHUB_URL}">Version: {VERSION}</a>
-          <div class="theme-toggle-wrapper">
-          <input type="checkbox" id="theme-toggle" />
-          <label for="theme-toggle" class="theme-toggle">
-            <span class="icon sun">☀️</span>
-            <span class="icon moon">🌙</span>
-            <span class="ball"></span>
-          </label>
-        </div>
     </footer>
     </html>
     """
