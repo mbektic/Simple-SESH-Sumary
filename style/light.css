@@ -30,3 +30,7 @@ tr:hover {
 th, td, a{
     font-weight: bold;
 }
+
+.highlight {
+    font-weight: bolder;
+}

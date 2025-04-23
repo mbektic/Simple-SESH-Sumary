@@ -31,13 +31,10 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 
 ## Images
 ### Artist (Dark Mode and Play Time)
-
-
-### Tracks (Dark Mode and Play Time Mode True)
 ![Image](https://github.com/user-attachments/assets/a2b84762-d564-44f0-90c4-3235670fb64a)
 
-### Albums (Light Mode and Play Time Mode False)
+### Tracks (Light Mode and Play Count)
 ![Image](https://github.com/user-attachments/assets/40cc2892-69db-4ca8-b669-429ac6042b0e)
 
-### Search
-![Image](https://github.com/user-attachments/assets/c35b0412-c7da-4acb-9202-6736c198a3ca)
+### Albums (Search)
+![Image](https://github.com/user-attachments/assets/1a9ba192-1fc5-4cc6-b115-a5f57ebef6db)

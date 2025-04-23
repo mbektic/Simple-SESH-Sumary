@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] 2025-04-22
+### Added
+- Text highlighting on search terms. 
+
+### Changed
+- The page title is now "Spotify Summary"
+- Moved the title bar and loading page to a new HTML file
+- If there are no search results, a "No results found" message will be shown.
+- Milliseconds always now format with three digits for consistency
+
 ## [1.5.0] 2025-04-22
 ### Added
 - New header bar with a settings menu and moved the dark theme slide and the play mode switch under it. 
@@ -53,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a dark_mode toggle button. 
 
 ### Changed
-- Rewrote the pagination functions to drastically improve render time. 8–10 seconds with my full data to about 3 in firefox, 1 second in chromium-based browsers. 
+- Rewrote the pagination functions to drastically improve render time. 8–10 seconds with my full data to about 3 in firefox, 1 second in Chromium-based browsers. 
 - Redid the light theme to make it better along with some other minor styling changes.
 - Imported * from config to clean up code.
 - Changed Page Title to "Spotify Streaming History"

@@ -84,14 +84,48 @@ function paginateTable(tableId, pageSize) {
         createButton("Next", currentPage + 1, false, currentPage === totalPages);
     }
 
-    function applySearch(term) {
-        const lowerTerm = term.toLowerCase();
+function applySearch(term) {
+    const lowerTerm = term.toLowerCase();
 
-        filteredRows = originalRows.filter(tr =>
-            tr.textContent.toLowerCase().includes(lowerTerm)
-        );
+    filteredRows = originalRows.filter(tr =>
+        tr.textContent.toLowerCase().includes(lowerTerm)
+    );
 
-        renderPage(1);
+    if (filteredRows.length === 0) {
+        const colCount = originalRows[0]?.children.length || 1;
+        const noResultsRow = document.createElement("tr");
+        const td = document.createElement("td");
+        td.style.height = "300px";
+        td.colSpan = colCount;
+        td.textContent = "No results found.";
+        td.style.textAlign = "center";
+        noResultsRow.appendChild(td);
+        filteredRows = [noResultsRow];
+    }
+
+    renderPage(1);
+
+    // Highlight matches only if there are results
+    if (filteredRows.length > 0 && filteredRows[0].textContent !== "No results found.") {
+        highlightVisibleMatches(term);
+    }
+}
+
+    function highlightVisibleMatches(term) {
+        if (!term) return;
+
+        const regex = new RegExp(`(${term})`, "gi");
+        const tbody = document.querySelector(`#${tableId}-${mode} table tbody`);
+        const rows = tbody.querySelectorAll("tr");
+
+        rows.forEach(row => {
+            row.querySelectorAll("td").forEach(cell => {
+                const originalText = cell.textContent;
+
+                // Only highlight plain text, strip HTML before replacing
+                cell.innerHTML = originalText.replace(regex, `<span class="highlight">$1</span>`);
+            });
+        });
     }
 
     if (searchInput) {

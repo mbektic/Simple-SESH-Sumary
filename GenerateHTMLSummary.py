@@ -4,7 +4,7 @@ from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -14,7 +14,7 @@ def ms_to_hms(ms):
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
     milliseconds = ms - (hours * 60 * 60 * 1000) - (minutes * 60 * 1000) - (seconds * 1000)
-    return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds}ms"
+    return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds:03}ms"
 
 
 def print_file(path):
@@ -153,27 +153,12 @@ def count_plays_from_directory(config):
     <html>
     <head>
         <meta charset="UTF-8">
-        <title>Play Counts Summary</title>
+        <title>Spotify Summary</title>
         {print_styles()}
         {generate_js()}
     </head>
     <body>
-            <div id="title-bar">
-            <h1>Spotify Streaming History</h1>
-            <div class="title-controls">
-            <button id="settings-button" title="Settings" aria-label="Settings" style="background: none; border: none; cursor: pointer;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-            </button>
-            </div>
-        </div>
-        
-        <div id="loading-overlay">
-            <div class="spinner"></div>
-            <div class="loading-text">Loading…</div>
-        </div>
+        {print_file("html/title_bar.html")}
         
         {build_table("🎤 Artists", artist_time, artist_counts, "artist-table")}
         {build_table("🎶 Tracks", track_time, track_counts, "track-table")}

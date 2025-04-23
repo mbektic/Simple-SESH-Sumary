@@ -2,6 +2,12 @@
     display: none;
 }
 
+.highlight {
+    background-color: #1DB954;
+    color: #ffffff;
+    font-weight: bold;
+}
+
 body {
     font-family: 'Courier New', monospace;
     margin: 0;
@@ -40,10 +46,12 @@ th, td {
     font-size: larger;
 }
 
+tr th:first-of-type,
 tr td:first-of-type {
     width: 10%;
 }
 
+tr th:nth-of-type(2),
 tr td:nth-of-type(2) {
     width: 60%;
 }
