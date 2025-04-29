@@ -2,6 +2,7 @@ const themeStyle = document.getElementById("theme-style");
 const currentTheme = localStorage.getItem("theme") || "dark";
 themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
 const originalRowCache = {};
+const searchTerms = {};
 
 window.onload = () => {
     const overlay = document.getElementById('loading-overlay');
@@ -130,8 +131,12 @@ function paginateTable(tableId, pageSize) {
     }
 
     if (searchInput) {
+        // derive a “prefix” like "artist-table" or "track-table" (drops "-2023" or "-all")
+        const prefix = tableId.replace(/-(?:\d{4}|all)$/, '');
         searchInput.addEventListener("input", () => {
-            applySearch(searchInput.value);
+            const term = searchInput.value;
+            searchTerms[prefix] = term;       // save it
+            applySearch(term);
         });
     }
 
@@ -151,16 +156,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Global mode toggle
     const modeToggle = document.getElementById("global-mode-toggle");
-    const modeToggleText = document.getElementById(`mode-toggle-label`)
-    ;
+    const modeToggleText = document.getElementById(`mode-toggle-label`);
     modeToggle.addEventListener("change", () => {
         const newMode = modeToggle.checked ? "playtime" : "playcount";
 
-        ["artist-table", "track-table", "album-table"].forEach(tableId => {
-            switchMode(tableId, newMode);
+        document.querySelectorAll('.year-section').forEach(sec => {
+            const yr = sec.id.split('-')[1];          // e.g. "all", "2023", etc.
+            ["artist-table", "track-table", "album-table"].forEach(base => {
+                switchMode(`${base}-${yr}`, newMode);
+            });
         });
 
-        modeToggleText.textContent = modeToggle.checked ? "Switch to Playcount:" : "Switch to Playtime:";
+        modeToggleText.textContent = modeToggle.checked
+            ? "Switch to Playcount:"
+            : "Switch to Playtime:";
     });
 })
 
@@ -208,12 +217,21 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.year-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
-            document.querySelectorAll('.year-section').forEach(sec => {
-                sec.style.display = 'none';
-            });
-
+            document.querySelectorAll('.year-section').forEach(sec => sec.style.display = 'none');
             const y = tab.dataset.year;
-            document.getElementById(`year-${y}`).style.display = 'block';
+            const section = document.getElementById(`year-${y}`);
+            section.style.display = 'block';
+
+            // restore any saved searches in this section
+            section.querySelectorAll('.search-input').forEach(input => {
+                // map "artist-table-2023-search" → "artist-table-2023" → prefix "artist-table"
+                const tableId = input.id.replace(/-search$/, '');
+                const prefix = tableId.replace(/-(?:\d{4}|all)$/, '');
+                const term = searchTerms[prefix] || "";
+                input.value = term;
+
+                input.dispatchEvent(new Event('input'));
+            });
         });
     });
 });
