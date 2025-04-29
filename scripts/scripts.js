@@ -7,9 +7,12 @@ window.onload = () => {
     const overlay = document.getElementById('loading-overlay');
 
     requestAnimationFrame(() => {
-        paginateTable("artist-table", ITEMS_PER_PAGE);
-        paginateTable("track-table", ITEMS_PER_PAGE);
-        paginateTable("album-table", ITEMS_PER_PAGE);
+        document.querySelectorAll('.year-section').forEach(sec => {
+            const yr = sec.id.split('-')[1];
+            paginateTable(`artist-table-${yr}`, ITEMS_PER_PAGE);
+            paginateTable(`track-table-${yr}`, ITEMS_PER_PAGE);
+            paginateTable(`album-table-${yr}`, ITEMS_PER_PAGE);
+        });
 
         // Trigger the fade-out
         overlay.classList.add('fade-out');
@@ -84,32 +87,32 @@ function paginateTable(tableId, pageSize) {
         createButton("Next", currentPage + 1, false, currentPage === totalPages);
     }
 
-function applySearch(term) {
-    const lowerTerm = term.toLowerCase();
+    function applySearch(term) {
+        const lowerTerm = term.toLowerCase();
 
-    filteredRows = originalRows.filter(tr =>
-        tr.textContent.toLowerCase().includes(lowerTerm)
-    );
+        filteredRows = originalRows.filter(tr =>
+            tr.textContent.toLowerCase().includes(lowerTerm)
+        );
 
-    if (filteredRows.length === 0) {
-        const colCount = originalRows[0]?.children.length || 1;
-        const noResultsRow = document.createElement("tr");
-        const td = document.createElement("td");
-        td.style.height = "300px";
-        td.colSpan = colCount;
-        td.textContent = "No results found.";
-        td.style.textAlign = "center";
-        noResultsRow.appendChild(td);
-        filteredRows = [noResultsRow];
+        if (filteredRows.length === 0) {
+            const colCount = originalRows[0]?.children.length || 1;
+            const noResultsRow = document.createElement("tr");
+            const td = document.createElement("td");
+            td.style.height = "300px";
+            td.colSpan = colCount;
+            td.textContent = "No results found.";
+            td.style.textAlign = "center";
+            noResultsRow.appendChild(td);
+            filteredRows = [noResultsRow];
+        }
+
+        renderPage(1);
+
+        // Highlight matches only if there are results
+        if (filteredRows.length > 0 && filteredRows[0].textContent !== "No results found.") {
+            highlightVisibleMatches(term);
+        }
     }
-
-    renderPage(1);
-
-    // Highlight matches only if there are results
-    if (filteredRows.length > 0 && filteredRows[0].textContent !== "No results found.") {
-        highlightVisibleMatches(term);
-    }
-}
 
     function highlightVisibleMatches(term) {
         if (!term) return;
@@ -121,8 +124,6 @@ function applySearch(term) {
         rows.forEach(row => {
             row.querySelectorAll("td").forEach(cell => {
                 const originalText = cell.textContent;
-
-                // Only highlight plain text, strip HTML before replacing
                 cell.innerHTML = originalText.replace(regex, `<span class="highlight">$1</span>`);
             });
         });
@@ -199,5 +200,20 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === modal) {
             modal.style.display = "none";
         }
+    });
+
+    // year-tab click handler
+    document.querySelectorAll('.year-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.year-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            document.querySelectorAll('.year-section').forEach(sec => {
+                sec.style.display = 'none';
+            });
+
+            const y = tab.dataset.year;
+            document.getElementById(`year-${y}`).style.display = 'block';
+        });
     });
 });

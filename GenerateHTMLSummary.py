@@ -1,10 +1,11 @@
+from datetime import datetime
 import json
 import sys
 from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.5.1"
+VERSION = "1.6.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -52,12 +53,14 @@ def print_styles():
 
 
 def count_plays_from_directory(config):
-    artist_counts = defaultdict(int)
-    track_counts = defaultdict(int)
-    album_counts = defaultdict(int)
-    artist_time = defaultdict(int)
-    track_time = defaultdict(int)
-    album_time = defaultdict(int)
+    yearly = defaultdict(lambda: {
+        "artist_counts": defaultdict(int),
+        "artist_time": defaultdict(int),
+        "track_counts": defaultdict(int),
+        "track_time": defaultdict(int),
+        "album_counts": defaultdict(int),
+        "album_time": defaultdict(int),
+    })
 
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
@@ -89,18 +92,21 @@ def count_plays_from_directory(config):
                     track = entry.get("master_metadata_track_name") + " - " + artist
                     album = entry.get("master_metadata_album_album_name") + " - " + artist
 
+                    year = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00")).year
+                    y = yearly[year]
+
                     if artist:
                         if entry.get("ms_played") > MIN_MILLISECONDS:
-                            artist_counts[artist] += 1
-                        artist_time[artist] += entry.get("ms_played")
+                            y["artist_counts"][artist] += 1
+                        y["artist_time"][artist] += entry["ms_played"]
                     if track:
                         if entry.get("ms_played") > MIN_MILLISECONDS:
-                            track_counts[track] += 1
-                        track_time[track] += entry.get("ms_played")
+                            y["track_counts"][track] += 1
+                        y["track_time"][track] += entry["ms_played"]
                     if album:
                         if entry.get("ms_played") > MIN_MILLISECONDS:
-                            album_counts[album] += 1
-                        album_time[album] += entry.get("ms_played")
+                            y["album_counts"][album] += 1
+                        y["album_time"][album] += entry["ms_played"]
 
     def generate_js():
         return """<script>
@@ -148,6 +154,58 @@ def count_plays_from_directory(config):
         <div class="pagination" id="{table_id}-nav"></div>
         """
 
+    years = sorted(yearly.keys())
+    tabs = '<button class="year-tab active" data-year="all">All</button>' + "".join(
+        f'<button class="year-tab" data-year="{yr}">{yr}</button>'
+        for yr in years
+    )
+    sections = ""
+
+    all_data = {
+        "artist_counts": defaultdict(int),
+        "artist_time": defaultdict(int),
+        "track_counts": defaultdict(int),
+        "track_time": defaultdict(int),
+        "album_counts": defaultdict(int),
+        "album_time": defaultdict(int),
+    }
+    for ydata in yearly.values():
+        for key in ["artist_counts", "track_counts", "album_counts"]:
+            for name, cnt in ydata[key].items():
+                all_data[key][name] += cnt
+        for key in ["artist_time", "track_time", "album_time"]:
+            for name, t in ydata[key].items():
+                all_data[key][name] += t
+
+    # “All” section
+    sections += '<div class="year-section" id="year-all" style="display: block;">'
+    sections += build_table("🎤 Artists",
+                            all_data["artist_time"], all_data["artist_counts"],
+                            "artist-table-all")
+    sections += build_table("🎶 Tracks",
+                            all_data["track_time"], all_data["track_counts"],
+                            "track-table-all")
+    sections += build_table("💿 Albums",
+                            all_data["album_time"], all_data["album_counts"],
+                            "album-table-all")
+    sections += "</div>"
+
+    # per-year sections
+    for yr in years:
+        style = "none"
+        prefix = f"{yr}-"
+        sections += f'<div class="year-section" id="year-{yr}" style="display: {style};">'
+        sections += build_table("🎤 Artists",
+                                yearly[yr]["artist_time"], yearly[yr]["artist_counts"],
+                                f"artist-table-{yr}")
+        sections += build_table("🎶 Tracks",
+                                yearly[yr]["track_time"], yearly[yr]["track_counts"],
+                                f"track-table-{yr}")
+        sections += build_table("💿 Albums",
+                                yearly[yr]["album_time"], yearly[yr]["album_counts"],
+                                f"album-table-{yr}")
+        sections += "</div>"
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -160,9 +218,8 @@ def count_plays_from_directory(config):
     <body>
         {print_file("html/title_bar.html")}
         
-        {build_table("🎤 Artists", artist_time, artist_counts, "artist-table")}
-        {build_table("🎶 Tracks", track_time, track_counts, "track-table")}
-        {build_table("💿 Albums", album_time, album_counts, "album-table")}
+        <div id="year-tabs">{tabs}</div>
+        {sections}
         
         {print_file("html/settings_modal.html")}
     </body>

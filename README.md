@@ -30,6 +30,9 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 - None of your data ever leaves your system or is uploaded anywhere, this all stays on your machine.
 
 ## Images
+### Year Selector
+![Image](https://github.com/user-attachments/assets/0fa47626-5256-4a3e-a7cb-423226da9878)
+
 ### Artist (Dark Mode and Play Time)
 ![Image](https://github.com/user-attachments/assets/a2b84762-d564-44f0-90c4-3235670fb64a)
 

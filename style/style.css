@@ -137,6 +137,56 @@ a, a:visited {
 
 
 /****************************
+* Year-tabs across the top
+*****************************/
+#year-tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5em;
+    background-color: #1DB954;
+}
+
+.year-tab {
+    padding: 0.5em 1em;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #ffffff;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.year-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.year-tab.active {
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+.year-section {
+    padding-top: 1em;
+}
+
+#year-tabs {
+    background-color: #1DB954;
+}
+.year-tab {
+    color: #ffffff;
+}
+.year-tab.active {
+    border-color: #ffffff;
+}
+.year-tab:hover {
+    color: rgba(255,255,255,0.8);
+}
+
+/****************************
 * SWITCHERS
 *****************************/
 .theme-toggle-wrapper {
@@ -447,5 +497,15 @@ a, a:visited {
 
     .modal-content {
         max-width: 85%;
+    }
+
+    #year-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .year-tab {
+        margin: 4px 6px;
+        font-size: 2em;
     }
 }
