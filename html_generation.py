@@ -9,7 +9,7 @@ from typing import Dict, List, Any, DefaultDict
 
 def ms_to_hms(ms: int) -> str:
     """
-    Convert milliseconds to a formatted hours:minutes:seconds milliseconds string.
+    Convert milliseconds to a formatted string hours:minutes:seconds milliseconds.
 
     Args:
         ms (int): Milliseconds to convert
@@ -47,8 +47,8 @@ def print_file(path: str) -> str:
         str: Contents of the file
 
     Raises:
-        FileNotFoundError: If the file does not exist
-        PermissionError: If the file cannot be read due to permission issues
+        FileNotFoundError: If the file does not exist.
+        PermissionError: If the file cannot be read due to permission issues.
     """
     try:
         with open(path, 'r', encoding='utf-8') as file:

@@ -6,9 +6,9 @@ Spotify Extended Streaming History data.
 """
 import calendar
 import logging
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, date, timedelta
-from typing import Dict, List, Any, Set, Tuple, DefaultDict
+from typing import Dict, List, Any, Set, DefaultDict
 
 def calculate_basic_stats(
     first_ts: datetime,
@@ -204,13 +204,13 @@ def calculate_milestone_stats(
             - next_need: Days needed for next Eddington number
             - art_cut: Artist cut-over point
             - pop_year: Most popular year
-            - pop_year_plays: Number of plays in most popular year
+            - pop_year_plays: Number of plays in the most popular year
             - pop_mon_str: Most popular month
             - pop_mon_plays: Number of plays in most popular month
             - week_str: Most popular week
             - week_plays: Number of plays in most popular week
             - day_str: Most popular day
-            - day_plays: Number of plays in most popular day
+            - day_plays: Number of plays in the most popular day
     """
     try:
         # Calculate Eddington number with error handling
@@ -264,7 +264,6 @@ def calculate_milestone_stats(
         try:
             weekly_counts = Counter()
             for d, cnt in daily_counts.items():
-                # d.isocalendar() → (year, weeknumber, weekday)
                 yr, wk, _ = d.isocalendar()
                 weekly_counts[(yr, wk)] += cnt
 
@@ -495,7 +494,7 @@ def calculate_session_stats(
             - num_sessions: Number of listening sessions
             - avg_str: Average session length
             - long_str: Longest single session
-            - long_date_str: Date of longest session
+            - long_date_str: Date of the longest session
             - skip_count: Number of skipped tracks
             - play_counted: Total number of plays counted
             - skip_rate_pct: Skip rate percentage
@@ -611,8 +610,8 @@ def calculate_track_stats(
             - total_ms: Total listening time in milliseconds
             - total_plays: Total number of plays
             - total_time_str: Total listening time as string
-            - avg_play_ms: Average play time in milliseconds
-            - avg_play_str: Average play time as string
+            - avg_play_ms: Average playtime in milliseconds
+            - avg_play_str: Average playtime as string
             - unique_tracks: Number of unique tracks
             - unique_ratio_pct: Unique tracks ratio percentage
             - most_skipped: Most skipped track
@@ -636,7 +635,7 @@ def calculate_track_stats(
         if total_plays > 0:
             avg_play_ms = total_ms / total_plays
 
-            # Format average play time
+            # Format average playtime
             avg_seconds = int(avg_play_ms) // 1000
             avg_hours = avg_seconds // 3600
             avg_minutes = (avg_seconds % 3600) // 60

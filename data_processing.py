@@ -184,18 +184,18 @@ def process_spotify_data(entries: List[Dict[str, Any]], min_milliseconds: int) -
 
     for entry in entries:
         try:
-            # Skip entries with no play time or missing required fields
+            # Skip entries with no playtime or missing required fields
             if not entry.get("ms_played") or entry["ms_played"] <= 0:
                 continue
 
-            # Skip entries with missing timestamp
+            # Skip entries with a missing timestamp
             if "ts" not in entry:
                 logging.warning(f"Entry missing timestamp, skipping: {entry.get('master_metadata_track_name', 'Unknown track')}")
                 continue
 
             # Process entries with artist information
             if entry.get("master_metadata_album_artist_name"):
-                # Get artist name or use fallback
+                # Get the artist name or use fallback
                 artist = entry.get("master_metadata_album_artist_name", "Unknown Artist")
 
                 # Handle missing track or album names gracefully

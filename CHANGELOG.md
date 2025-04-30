@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.2] 2025-04-30
+### Changed
+- Renamed `Gui.py` to `gui.pi` to better fit the rest of the filenames.
+- Renamed `Config.py` to `config.pi` to better fit the rest of the filenames.
+- Cleaned up some comments
+
 ## [1.11.1] 2025-04-30
 ### Fixed
 - Fixed input validation on minimum milliseconds
@@ -12,9 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.11.0] 2025-04-30
 ### Changed
 - Refactored GenerateHTMLSummary.py into smaller, more focused modules:
-  - Created data_processing.py for data loading and processing functions
-  - Created statistics.py for statistics calculation functions
-  - Created html_generation.py for HTML generation functions
+  - Created `data_processing.py` for data loading and processing functions
+  - Created `statistics.py` for statistics calculation functions
+  - Created `html_generation.py` for HTML generation functions
 - Improved code organization and maintainability
 
 ## [1.10.0] 2025-04-30

@@ -9,7 +9,7 @@ import logging
 import sys
 from typing import Any
 
-from Gui import *
+from gui import *
 from data_processing import load_spotify_data, process_spotify_data, aggregate_yearly_data
 from html_generation import build_year_tabs, build_all_section, build_year_sections, build_stats_html, \
     generate_html_content, write_html_to_file
