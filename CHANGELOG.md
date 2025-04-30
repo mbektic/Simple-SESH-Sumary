@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] 2025-04-30
+### Added
+- Added JSON data structure validation
+- Added type hints for better IDE support
+- Added proper exception handling for file operations
+- Added docstrings to functions
+- Added input validation for GUI fields
+- Added graceful degradation for missing or corrupt data
+- Added comprehensive error handling throughout the application
+- Added total plays stat
+- Added input validation for GUI fields
+- Added graceful degradation for missing or corrupt data
+- Added comprehensive error handling throughout the application
+- Added keyboard navigation support for all interactive elements
+- Added ARIA attributes for improved screen reader support
+- Added focus management for modals and dialogs
+- Added enhanced user-friendly error messages in the GUI,
+
+### Changed
+- Replaced print statements with logging calls
+
+### Fixed
+- Fixed highlighting not working after searching and changing the page.
+
 ## [1.9.1] 2025-04-30
 ### Changed
 - Regrouped the stats to make them easier to digest.

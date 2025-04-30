@@ -1,16 +1,35 @@
-from datetime import datetime, date, timedelta
-import json
-import sys
 import calendar
-from Gui import *
+import json
+import logging
+import sys
 from collections import defaultdict, Counter
+from datetime import datetime, date, timedelta
+from typing import Dict, List, Any
+
+from Gui import *
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.9.1"
+VERSION = "1.10.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
-def ms_to_hms(ms):
+def ms_to_hms(ms: int) -> str:
+    """
+    Convert milliseconds to a formatted hours:minutes:seconds milliseconds string.
+
+    Args:
+        ms (int): Milliseconds to convert
+
+    Returns:
+        str: Formatted string in the format "HH:MM:SS MSSms"
+    """
     seconds = ms // 1000
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
@@ -19,41 +38,147 @@ def ms_to_hms(ms):
     return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds:03}ms"
 
 
-def print_file(path):
+def print_file(path: str) -> str:
+    """
+    Read and return the contents of a file.
+
+    Args:
+        path (str): Path to the file to read
+
+    Returns:
+        str: Contents of the file
+
+    Raises:
+        FileNotFoundError: If the file does not exist
+        PermissionError: If the file cannot be read due to permission issues
+    """
     try:
         with open(path, 'r', encoding='utf-8') as file:
             contents = file.read()
     except UnicodeDecodeError:
         # If utf-8 fails, you can fall back to 'utf-8-sig' or another encoding like 'latin-1'
-        with open(path, 'r', encoding='utf-8-sig') as file:
-            contents = file.read()
+        try:
+            with open(path, 'r', encoding='utf-8-sig') as file:
+                contents = file.read()
+        except UnicodeDecodeError:
+            # If utf-8-sig also fails, try latin-1 as a last resort
+            logging.warning(f"Failed to decode {path} with utf-8 and utf-8-sig, trying latin-1")
+            with open(path, 'r', encoding='latin-1') as file:
+                contents = file.read()
+    except (FileNotFoundError, PermissionError) as e:
+        logging.error(f"Error reading file {path}: {e}")
+        raise
     return contents
 
 
-def escape_js_string(s):
+def escape_js_string(s: str) -> str:
+    """
+    Escape special characters in a string for use in JavaScript template literals.
+
+    Args:
+        s (str): The string to escape
+
+    Returns:
+        str: The escaped string
+    """
     return s.replace("\\", "\\\\").replace("`", "\\`")
 
 
-def print_styles():
-    base_style = print_file("style/style.css")
-    dark_style = print_file("style/dark.css")
-    light_style = print_file("style/light.css")
-
-    return f"""
-    <style id="base-style">
-        {base_style}
-    </style>
-    <style id="theme-style">
-        {dark_style}
-    </style>
-    <script>
-        const DARK_CSS = `{escape_js_string(dark_style)}`;
-        const LIGHT_CSS = `{escape_js_string(light_style)}`;
-    </script>
+def validate_spotify_json(data: List[Dict[str, Any]]) -> bool:
     """
+    Validate the structure of Spotify streaming history JSON data.
+
+    Args:
+        data (List[Dict[str, Any]]): The parsed JSON data to validate
+
+    Returns:
+        bool: True if the data is valid, False otherwise
+
+    Raises:
+        ValueError: If the data is not a list or is empty
+    """
+    if not isinstance(data, list):
+        raise ValueError("Spotify data must be a list of entries")
+
+    if not data:
+        logging.warning("Spotify data is empty")
+        return False
+
+    # Check a sample of entries (first 10 or all if less than 10)
+    sample_size = min(10, len(data))
+    sample = data[:sample_size]
+
+    required_fields = ['ts', 'ms_played']
+    optional_metadata_fields = [
+        'master_metadata_album_artist_name',
+        'master_metadata_track_name',
+        'master_metadata_album_album_name'
+    ]
+
+    valid_entries = 0
+
+    for entry in sample:
+        if not isinstance(entry, dict):
+            continue
+
+        # Check required fields
+        if all(field in entry for field in required_fields):
+            valid_entries += 1
+
+    # If at least 70% of the sample entries are valid, consider the data valid
+    return (valid_entries / sample_size) >= 0.7
 
 
-def count_plays_from_directory(config):
+def print_styles() -> str:
+    """
+    Read CSS files and return HTML style tags with the CSS content.
+
+    Returns:
+        str: HTML style tags and JavaScript constants with CSS content
+
+    Raises:
+        FileNotFoundError: If any of the CSS files cannot be found
+    """
+    try:
+        base_style = print_file("style/style.css")
+        dark_style = print_file("style/dark.css")
+        light_style = print_file("style/light.css")
+
+        return f"""
+        <style id="base-style">
+            {base_style}
+        </style>
+        <style id="theme-style">
+            {dark_style}
+        </style>
+        <script>
+            const DARK_CSS = `{escape_js_string(dark_style)}`;
+            const LIGHT_CSS = `{escape_js_string(light_style)}`;
+        </script>
+        """
+    except Exception as e:
+        logging.error(f"Error loading CSS files: {e}")
+        raise
+
+
+def count_plays_from_directory(config: Any) -> None:
+    """
+    Process Spotify streaming history JSON files and generate an HTML summary report.
+
+    Args:
+        config: Configuration object with attributes:
+            - MIN_MILLISECONDS: Minimum milliseconds for a play to count
+            - INPUT_DIR: Directory containing JSON files
+            - OUTPUT_FILE: Base name for the output HTML file
+            - ITEMS_PER_PAGE: Number of items per page in the HTML tables
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If the input directory does not exist
+        PermissionError: If files cannot be read or written due to permission issues
+    """
     yearly = defaultdict(lambda: {
         "artist_counts": defaultdict(int),
         "artist_time": defaultdict(int),
@@ -94,29 +219,62 @@ def count_plays_from_directory(config):
     ]
 
     if not json_files:
-        print("⚠️ No JSON files found in the directory.")
+        logging.warning("⚠️ No JSON files found in the directory.")
         return
 
     for file in json_files:
         try:
             with open(file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+
+            # Validate the JSON data structure
+            if not validate_spotify_json(data):
+                logging.warning(f"⚠️ File {file} has invalid data structure, skipping")
+                continue
+
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"⚠️ Error reading {file}: {e}")
+            logging.error(f"⚠️ Error reading {file}: {e}")
+            continue
+        except ValueError as e:
+            logging.error(f"⚠️ Invalid data format in {file}: {e}")
             continue
 
         for entry in data:
-            if entry.get("ms_played") is not None and entry["ms_played"] > 0:
-                if entry.get("master_metadata_album_artist_name"):
-                    artist = entry.get("master_metadata_album_artist_name")
-                    track = entry.get("master_metadata_track_name") + " - " + artist
-                    album = entry.get("master_metadata_album_album_name") + " - " + artist
+            try:
+                # Skip entries with no play time or missing required fields
+                if not entry.get("ms_played") or entry["ms_played"] <= 0:
+                    continue
 
-                    year = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00")).year
+                # Skip entries with missing timestamp
+                if "ts" not in entry:
+                    logging.warning(f"Entry missing timestamp, skipping: {entry.get('master_metadata_track_name', 'Unknown track')}")
+                    continue
+
+                # Process entries with artist information
+                if entry.get("master_metadata_album_artist_name"):
+                    # Get artist name or use fallback
+                    artist = entry.get("master_metadata_album_artist_name", "Unknown Artist")
+
+                    # Handle missing track or album names gracefully
+                    track_name = entry.get("master_metadata_track_name", "Unknown Track")
+                    album_name = entry.get("master_metadata_album_album_name", "Unknown Album")
+
+                    # Create full track and album identifiers
+                    track = f"{track_name} - {artist}"
+                    album = f"{album_name} - {artist}"
+
+                    # Parse timestamp with error handling
+                    try:
+                        dt = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00"))
+                        year = dt.year
+                    except (ValueError, TypeError) as e:
+                        logging.warning(f"Invalid timestamp format in entry, using current year: {e}")
+                        dt = datetime.now()
+                        year = dt.year
+
                     y = yearly[year]
 
                     # ─── update stats info ─────────────────────────────────
-                    dt = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00"))
                     dates_set.add(dt.date())
                     if first_ts is None or dt < first_ts:
                         first_ts = dt
@@ -145,18 +303,20 @@ def count_plays_from_directory(config):
                     artist_tracks[artist].add(track)
                     # ───────────────────────────────────────────────────────────
 
-                    if artist:
-                        if entry.get("ms_played") > MIN_MILLISECONDS:
-                            y["artist_counts"][artist] += 1
-                        y["artist_time"][artist] += entry["ms_played"]
-                    if track:
-                        if entry.get("ms_played") > MIN_MILLISECONDS:
-                            y["track_counts"][track] += 1
-                        y["track_time"][track] += entry["ms_played"]
-                    if album:
-                        if entry.get("ms_played") > MIN_MILLISECONDS:
-                            y["album_counts"][album] += 1
-                        y["album_time"][album] += entry["ms_played"]
+                    # Update counts and times
+                    if entry.get("ms_played") > MIN_MILLISECONDS:
+                        y["artist_counts"][artist] += 1
+                        y["track_counts"][track] += 1
+                        y["album_counts"][album] += 1
+
+                    # Update play times
+                    y["artist_time"][artist] += entry["ms_played"]
+                    y["track_time"][track] += entry["ms_played"]
+                    y["album_time"][album] += entry["ms_played"]
+            except Exception as e:
+                # Catch any unexpected errors during entry processing
+                logging.error(f"Error processing entry: {e}")
+                continue
 
     def generate_js():
         return """<script>
@@ -205,8 +365,8 @@ def count_plays_from_directory(config):
         """
 
     years = sorted(yearly.keys())
-    tabs = '<button class="year-tab active" data-year="all">All</button>' + "".join(
-        f'<button class="year-tab" data-year="{yr}">{yr}</button>'
+    tabs = '<button class="year-tab active" data-year="all" role="tab" aria-selected="true" aria-controls="year-all">All</button>' + "".join(
+        f'<button class="year-tab" data-year="{yr}" role="tab" aria-selected="false" aria-controls="year-{yr}">{yr}</button>'
         for yr in years
     )
     sections = ""
@@ -256,190 +416,403 @@ def count_plays_from_directory(config):
         sections += "</div>"
 
         # ─── compute overall stats ───────────────────────────────────────────
-        today = date.today()
-        days_since_first = (today - first_ts.date()).days
-        days_played = len(dates_set)
-        pct_days = days_played / days_since_first * 100
+        try:
+            today = date.today()
 
-        first_str = first_ts.strftime("%b %d, %Y")
-        first_desc = f"{first_str} ({first_entry['master_metadata_album_artist_name']} - {first_entry['master_metadata_track_name']})"
-        last_str = last_ts.strftime("%b %d, %Y")
-        last_desc = f"{last_str} ({last_entry['master_metadata_album_artist_name']} - {last_entry['master_metadata_track_name']})"
+            # Handle case where no valid entries were found
+            if first_ts is None:
+                logging.warning("No valid entries found with timestamps, using default values for stats")
+                days_since_first = 0
+                days_played = 0
+                pct_days = 0
+                first_str = "N/A"
+                first_desc = "No data available"
+                last_str = "N/A"
+                last_desc = "No data available"
+            else:
+                days_since_first = (today - first_ts.date()).days
+                days_played = len(dates_set)
+                pct_days = days_played / days_since_first * 100 if days_since_first > 0 else 0
 
-        artists_count = len(artist_set)
-        one_hits = sum(1 for a, ts in artist_tracks.items() if len(ts) == 1)
-        pct_one_hits = one_hits / artists_count * 100
+                # Format first entry details with fallbacks for missing data
+                first_str = first_ts.strftime("%b %d, %Y")
+                first_artist = first_entry.get('master_metadata_album_artist_name', 'Unknown Artist')
+                first_track = first_entry.get('master_metadata_track_name', 'Unknown Track')
+                first_desc = f"{first_str} ({first_artist} - {first_track})"
 
-        # artists present in every year
-        year_artist_sets = [
-            set(ydata["artist_counts"].keys()) | set(ydata["artist_time"].keys())
-            for ydata in yearly.values()
-        ]
-        every_year_list = sorted(set.intersection(*year_artist_sets))
-        every_year_count = len(every_year_list)
+                # Format last entry details with fallbacks for missing data
+                last_str = last_ts.strftime("%b %d, %Y")
+                last_artist = last_entry.get('master_metadata_album_artist_name', 'Unknown Artist')
+                last_track = last_entry.get('master_metadata_track_name', 'Unknown Track')
+                last_desc = f"{last_str} ({last_artist} - {last_track})"
+        except Exception as e:
+            logging.error(f"Error computing basic stats: {e}")
+            days_since_first = 0
+            days_played = 0
+            pct_days = 0
+            first_str = "Error"
+            first_desc = "Error computing stats"
+            last_str = "Error"
+            last_desc = "Error computing stats"
 
-        albums_count = len(album_set)
-        albums_per_artist = albums_count / artists_count
-        tracks_count = len(track_set)
+        try:
+            # Calculate artist statistics with error handling
+            artists_count = len(artist_set)
+            if artists_count > 0:
+                one_hits = sum(1 for a, ts in artist_tracks.items() if len(ts) == 1)
+                pct_one_hits = one_hits / artists_count * 100
+            else:
+                logging.warning("No artists found, using default values for artist stats")
+                one_hits = 0
+                pct_one_hits = 0
 
-        counts = sorted(daily_counts.values(), reverse=True)
-        edd = next((i for i, n in enumerate(counts, start=1) if n < i), len(counts))
-        next_need = max(0, (edd + 1) - sum(1 for c in counts if c >= edd + 1))
+            # Calculate artists present in every year with error handling
+            if yearly:
+                try:
+                    year_artist_sets = [
+                        set(ydata["artist_counts"].keys()) | set(ydata["artist_time"].keys())
+                        for ydata in yearly.values()
+                    ]
+                    if year_artist_sets:
+                        every_year_list = sorted(set.intersection(*year_artist_sets))
+                        every_year_count = len(every_year_list)
+                    else:
+                        every_year_list = []
+                        every_year_count = 0
+                except Exception as e:
+                    logging.error(f"Error computing every-year artists: {e}")
+                    every_year_list = []
+                    every_year_count = 0
+            else:
+                every_year_list = []
+                every_year_count = 0
 
-        # ─── Artist cut-over point ────────────────────────────────
-        art_vals = sorted(all_data["artist_counts"].values(), reverse=True)
-        art_cut = next((i for i, n in enumerate(art_vals, start=1) if n < i), len(art_vals))
+            # Calculate album and track statistics with error handling
+            albums_count = len(album_set)
+            tracks_count = len(track_set)
 
-        # ─── Most popular year/month/week/dau ─────────────────────────────
-        year_plays = {y: sum(d["track_counts"].values()) for y, d in yearly.items()}
-        pop_year, pop_year_plays = max(year_plays.items(), key=lambda kv: kv[1])
+            # Avoid division by zero
+            if artists_count > 0:
+                albums_per_artist = albums_count / artists_count
+            else:
+                albums_per_artist = 0
+        except Exception as e:
+            logging.error(f"Error computing library stats: {e}")
+            artists_count = 0
+            one_hits = 0
+            pct_one_hits = 0
+            every_year_list = []
+            every_year_count = 0
+            albums_count = 0
+            albums_per_artist = 0
+            tracks_count = 0
 
-        (pm_y, pm_m), pop_mon_plays = max(monthly_counts.items(), key=lambda kv: kv[1])
-        pop_mon_str = f"{calendar.month_name[pm_m]} {pm_y}"
+        try:
+            # Calculate Eddington number with error handling
+            counts = sorted(daily_counts.values(), reverse=True)
+            if counts:
+                edd = next((i for i, n in enumerate(counts, start=1) if n < i), len(counts))
+                next_need = max(0, (edd + 1) - sum(1 for c in counts if c >= edd + 1))
+            else:
+                logging.warning("No daily counts found, using default values for Eddington number")
+                edd = 0
+                next_need = 0
 
-        weekly_counts = Counter()
-        for d, cnt in daily_counts.items():
-            # d.isocalendar() → (year, weeknumber, weekday)
-            yr, wk, _ = d.isocalendar()
-            weekly_counts[(yr, wk)] += cnt
-        (wy, ww), week_plays = weekly_counts.most_common(1)[0]
-        week_start = datetime.strptime(f"{wy}-W{ww}-1", "%G-W%V-%u").date()
-        week_end = week_start + timedelta(days=6)
-        week_str = f"{week_start.strftime('%b %d')} – {week_end.strftime('%b %d, %Y')}"
+            # ─── Artist cut-over point ────────────────────────────────
+            try:
+                art_vals = sorted(all_data["artist_counts"].values(), reverse=True)
+                if art_vals:
+                    art_cut = next((i for i, n in enumerate(art_vals, start=1) if n < i), len(art_vals))
+                else:
+                    art_cut = 0
+            except Exception as e:
+                logging.error(f"Error computing artist cut-over point: {e}")
+                art_cut = 0
 
-        # — Most popular day (single date) —
-        if daily_counts:
-            most_day, day_plays = daily_counts.most_common(1)[0]
-            day_str = most_day.strftime("%b %d, %Y")
-        else:
-            week_str, week_plays, day_str, day_plays = "N/A", 0, "N/A", 0
+            # ─── Most popular year/month/week/dau ─────────────────────────────
+            # Most popular year
+            try:
+                if yearly:
+                    year_plays = {y: sum(d["track_counts"].values()) for y, d in yearly.items()}
+                    if year_plays:
+                        pop_year, pop_year_plays = max(year_plays.items(), key=lambda kv: kv[1])
+                    else:
+                        pop_year, pop_year_plays = "N/A", 0
+                else:
+                    pop_year, pop_year_plays = "N/A", 0
+            except Exception as e:
+                logging.error(f"Error computing most popular year: {e}")
+                pop_year, pop_year_plays = "N/A", 0
+
+            # Most popular month
+            try:
+                if monthly_counts:
+                    (pm_y, pm_m), pop_mon_plays = max(monthly_counts.items(), key=lambda kv: kv[1])
+                    pop_mon_str = f"{calendar.month_name[pm_m]} {pm_y}"
+                else:
+                    pop_mon_str, pop_mon_plays = "N/A", 0
+            except Exception as e:
+                logging.error(f"Error computing most popular month: {e}")
+                pop_mon_str, pop_mon_plays = "N/A", 0
+
+            # Most popular week
+            try:
+                weekly_counts = Counter()
+                for d, cnt in daily_counts.items():
+                    # d.isocalendar() → (year, weeknumber, weekday)
+                    yr, wk, _ = d.isocalendar()
+                    weekly_counts[(yr, wk)] += cnt
+
+                if weekly_counts:
+                    (wy, ww), week_plays = weekly_counts.most_common(1)[0]
+                    week_start = datetime.strptime(f"{wy}-W{ww}-1", "%G-W%V-%u").date()
+                    week_end = week_start + timedelta(days=6)
+                    week_str = f"{week_start.strftime('%b %d')} – {week_end.strftime('%b %d, %Y')}"
+                else:
+                    week_str, week_plays = "N/A", 0
+            except Exception as e:
+                logging.error(f"Error computing most popular week: {e}")
+                week_str, week_plays = "N/A", 0
+
+            # — Most popular day (single date) —
+            try:
+                if daily_counts:
+                    most_day, day_plays = daily_counts.most_common(1)[0]
+                    day_str = most_day.strftime("%b %d, %Y")
+                else:
+                    day_str, day_plays = "N/A", 0
+            except Exception as e:
+                logging.error(f"Error computing most popular day: {e}")
+                day_str, day_plays = "N/A", 0
+        except Exception as e:
+            logging.error(f"Error computing milestone stats: {e}")
+            edd = 0
+            next_need = 0
+            art_cut = 0
+            pop_year, pop_year_plays = "N/A", 0
+            pop_mon_str, pop_mon_plays = "N/A", 0
+            week_str, week_plays = "N/A", 0
+            day_str, day_plays = "N/A", 0
 
         # — Longest Listening Streak (with date range) —
+        try:
+            sorted_dates = sorted(dates_set)
+            if sorted_dates:
+                # initialize
+                max_streak = curr_streak = 1
+                streak_start = streak_end = sorted_dates[0]
+                temp_start = sorted_dates[0]
 
-        sorted_dates = sorted(dates_set)
-        # initialize
-        max_streak = curr_streak = 1
-        streak_start = streak_end = sorted_dates[0]
-        temp_start = sorted_dates[0]
-
-        for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
-            if next_day == prev_day + timedelta(days=1):
-                curr_streak += 1
+                for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
+                    if next_day == prev_day + timedelta(days=1):
+                        curr_streak += 1
+                    else:
+                        curr_streak = 1
+                        temp_start = next_day
+                    # record a new max
+                    if curr_streak > max_streak:
+                        max_streak = curr_streak
+                        streak_start = temp_start
+                        streak_end = next_day
             else:
-                curr_streak = 1
-                temp_start = next_day
-            # record a new max
-            if curr_streak > max_streak:
-                max_streak = curr_streak
-                streak_start = temp_start
-                streak_end = next_day
+                logging.warning("No dates found, using default values for streak stats")
+                max_streak = 0
+                streak_start = streak_end = None
+        except Exception as e:
+            logging.error(f"Error computing listening streak: {e}")
+            max_streak = 0
+            streak_start = streak_end = None
 
         # — Average Plays per Active Day —
-        avg_plays = sum(daily_counts.values()) / len(dates_set)
+        try:
+            if dates_set:
+                avg_plays = sum(daily_counts.values()) / len(dates_set)
+            else:
+                avg_plays = 0
+        except Exception as e:
+            logging.error(f"Error computing average plays per day: {e}")
+            avg_plays = 0
 
         # — Most Active Weekday —
-        wd_index, wd_count = weekday_counts.most_common(1)[0]
-        wd_name = calendar.day_name[wd_index]
+        try:
+            if weekday_counts:
+                wd_index, wd_count = weekday_counts.most_common(1)[0]
+                wd_name = calendar.day_name[wd_index]
+            else:
+                wd_name, wd_count = "N/A", 0
+        except Exception as e:
+            logging.error(f"Error computing most active weekday: {e}")
+            wd_name, wd_count = "N/A", 0
 
         # — Peak Listening Hour —
-        peak_hour, hour_count = hour_counts.most_common(1)[0]
-        hour12 = peak_hour % 12 or 12
-        suffix = "AM" if peak_hour < 12 else "PM"
-        peak_hour_str = f"{hour12}{suffix}"
+        try:
+            if hour_counts:
+                peak_hour, hour_count = hour_counts.most_common(1)[0]
+                hour12 = peak_hour % 12 or 12
+                suffix = "AM" if peak_hour < 12 else "PM"
+                peak_hour_str = f"{hour12}{suffix}"
+            else:
+                peak_hour_str, hour_count = "N/A", 0
+        except Exception as e:
+            logging.error(f"Error computing peak listening hour: {e}")
+            peak_hour_str, hour_count = "N/A", 0
 
         # ─── Unique Tracks Ratio ───────────────────────────────────
-        total_plays = sum(all_data["track_counts"].values())
-        unique_tracks = len(track_set)
-        unique_ratio_pct = unique_tracks / total_plays * 100
+        try:
+            total_plays = sum(all_data["track_counts"].values())
+            unique_tracks = len(track_set)
+            if total_plays > 0:
+                unique_ratio_pct = unique_tracks / total_plays * 100
+            else:
+                unique_ratio_pct = 0
+        except Exception as e:
+            logging.error(f"Error computing unique tracks ratio: {e}")
+            total_plays = 0
+            unique_tracks = 0
+            unique_ratio_pct = 0
 
         # ─── Gini Coefficient of Artist Plays ─────────────────────
-        vals = sorted(all_data["artist_counts"].values())
-        n = len(vals)
-        if n and sum(vals):
-            weighted = sum((i + 1) * v for i, v in enumerate(vals))
-            gini = (2 * weighted) / (n * sum(vals)) - (n + 1) / n
-        else:
+        try:
+            vals = sorted(all_data["artist_counts"].values())
+            n = len(vals)
+            if n and sum(vals):
+                weighted = sum((i + 1) * v for i, v in enumerate(vals))
+                gini = (2 * weighted) / (n * sum(vals)) - (n + 1) / n
+            else:
+                gini = 0
+        except Exception as e:
+            logging.error(f"Error computing Gini coefficient: {e}")
             gini = 0
 
         # ─── Weekend vs Weekday Ratio ────────────────────────────
-        weekend = weekday_counts[5] + weekday_counts[6]  # Sat=5, Sun=6
-        weekday = sum(weekday_counts[i] for i in range(5))
-        ratio_pct = weekend / weekday * 100 if weekday else 0
+        try:
+            weekend = weekday_counts[5] + weekday_counts[6]  # Sat=5, Sun=6
+            weekday = sum(weekday_counts[i] for i in range(5))
+            ratio_pct = weekend / weekday * 100 if weekday else 0
+        except Exception as e:
+            logging.error(f"Error computing weekend vs weekday ratio: {e}")
+            weekend = 0
+            weekday = 0
+            ratio_pct = 0
 
         # ─── Listening session stats ───────────────────────────
-        play_times.sort()
-        sessions = []
-        if play_times:
-            start = prev = play_times[0]
-            gap = timedelta(minutes=30)
-            for t in play_times[1:]:
-                if t - prev > gap:
-                    sessions.append((start, prev))
-                    start = t
-                prev = t
-            sessions.append((start, prev))
+        try:
+            play_times.sort()
+            sessions = []
+            if play_times:
+                start = prev = play_times[0]
+                gap = timedelta(minutes=30)
+                for t in play_times[1:]:
+                    if t - prev > gap:
+                        sessions.append((start, prev))
+                        start = t
+                    prev = t
+                sessions.append((start, prev))
 
-        num_sessions = len(sessions)
-        durations = [(end - start) for start, end in sessions]
-        total_dur = sum(durations, timedelta())
-        avg_session = total_dur / num_sessions if num_sessions else timedelta()
+            num_sessions = len(sessions)
+            durations = [(end - start) for start, end in sessions]
+            total_dur = sum(durations, timedelta())
+            avg_session = total_dur / num_sessions if num_sessions else timedelta()
 
-        if durations:
-            # find the longest session and its start
-            longest_dur = max(durations)
-            idx = durations.index(longest_dur)
-            longest_start, longest_end = sessions[idx]
-        else:
-            longest_dur = timedelta()
-            longest_start = longest_end = None
+            if durations:
+                # find the longest session and its start
+                longest_dur = max(durations)
+                idx = durations.index(longest_dur)
+                longest_start, longest_end = sessions[idx]
+            else:
+                longest_dur = timedelta()
+                longest_start = longest_end = None
 
-        # format durations
-        avg_str = ms_to_hms(int(avg_session.total_seconds() * 1000))
-        avg_str = avg_str[:-6]
-        long_str = ms_to_hms(int(longest_dur.total_seconds() * 1000))
-        long_str = long_str[:-6]
-        # format date for the longest session
-        if longest_start:
-            long_date_str = longest_start.strftime("%b %d, %Y")
-        else:
+            # format durations
+            avg_str = ms_to_hms(int(avg_session.total_seconds() * 1000))
+            avg_str = avg_str[:-6]
+            long_str = ms_to_hms(int(longest_dur.total_seconds() * 1000))
+            long_str = long_str[:-6]
+            # format date for the longest session
+            if longest_start:
+                long_date_str = longest_start.strftime("%b %d, %Y")
+            else:
+                long_date_str = "N/A"
+        except Exception as e:
+            logging.error(f"Error computing listening session stats: {e}")
+            num_sessions = 0
+            avg_str = "00:00:00"
+            long_str = "00:00:00"
             long_date_str = "N/A"
 
-        # ─── Skip rate & offline/online ratio ─────────────────────
-        online_count = play_counted - offline_count
-        skip_rate_pct = (skip_count / play_counted * 100) if play_counted else 0
-        offline_ratio_pct = (offline_count / play_counted * 100) if play_counted else 0
-        ratio_str = f"{offline_count}:{online_count}"
+        # ─── Skip rate and offline/online ratio ─────────────────────
+        try:
+            if play_counted > 0:
+                online_count = play_counted - offline_count
+                skip_rate_pct = (skip_count / play_counted * 100)
+                offline_ratio_pct = (offline_count / play_counted * 100)
+                ratio_str = f"{offline_count}:{online_count}"
+            else:
+                online_count = 0
+                skip_rate_pct = 0
+                offline_ratio_pct = 0
+                ratio_str = "0:0"
+        except Exception as e:
+            logging.error(f"Error computing skip rate and offline ratio: {e}")
+            online_count = 0
+            skip_rate_pct = 0
+            offline_ratio_pct = 0
+            ratio_str = "0:0"
 
-        # ─── Total listening time & average per play ─────────────
-        total_ms = sum(all_data["track_time"].values())
-        total_plays = sum(all_data["track_counts"].values())
-        total_time_str = ms_to_hms(total_ms)
-        total_time_str = total_time_str[:-6]
-        avg_play_ms = total_ms / total_plays if total_plays else 0
-        avg_play_str = ms_to_hms(int(avg_play_ms))
-        avg_play_str = avg_play_str[:-6]
+        # ─── Total listening time and average per play ─────────────
+        try:
+            total_ms = sum(all_data["track_time"].values())
+            total_plays = sum(all_data["track_counts"].values())
+            total_time_str = ms_to_hms(total_ms)
+            total_time_str = total_time_str[:-6]
+
+            if total_plays > 0:
+                avg_play_ms = total_ms / total_plays
+                avg_play_str = ms_to_hms(int(avg_play_ms))
+                avg_play_str = avg_play_str[:-6]
+            else:
+                avg_play_str = "00:00:00"
+        except Exception as e:
+            logging.error(f"Error computing total listening time: {e}")
+            total_ms = 0
+            total_plays = 0
+            total_time_str = "00:00:00"
+            avg_play_str = "00:00:00"
 
         # ─── Most skipped track ───────────────────────────────────
-        if track_skip_counts:
-            most_skipped, skip_ct = track_skip_counts.most_common(1)[0]
-        else:
+        try:
+            if track_skip_counts:
+                most_skipped, skip_ct = track_skip_counts.most_common(1)[0]
+            else:
+                most_skipped, skip_ct = "N/A", 0
+        except Exception as e:
+            logging.error(f"Error computing most skipped track: {e}")
             most_skipped, skip_ct = "N/A", 0
 
         # ─── Longest Hiatus ───────────────────────────────────────
-        longest_hiatus = 0
-        hiatus_start = hiatus_end = None
+        try:
+            longest_hiatus = 0
+            hiatus_start = hiatus_end = None
 
-        for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
-            gap = (next_day - prev_day).days - 1
-            if gap > longest_hiatus:
-                longest_hiatus = gap
-                hiatus_start = prev_day + timedelta(days=1)
-                hiatus_end = next_day - timedelta(days=1)
+            # Only compute if we have enough dates
+            if len(sorted_dates) > 1:
+                for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
+                    gap = (next_day - prev_day).days - 1
+                    if gap > longest_hiatus:
+                        longest_hiatus = gap
+                        hiatus_start = prev_day + timedelta(days=1)
+                        hiatus_end = next_day - timedelta(days=1)
 
-        if longest_hiatus > 0:
-            hi_start_str = hiatus_start.strftime("%b %d, %Y")
-            hi_end_str = hiatus_end.strftime("%b %d, %Y")
-        else:
+                if longest_hiatus > 0:
+                    hi_start_str = hiatus_start.strftime("%b %d, %Y")
+                    hi_end_str = hiatus_end.strftime("%b %d, %Y")
+                else:
+                    hi_start_str = hi_end_str = None
+            else:
+                hi_start_str = hi_end_str = None
+        except Exception as e:
+            logging.error(f"Error computing longest hiatus: {e}")
+            longest_hiatus = 0
             hi_start_str = hi_end_str = None
 
         # ─── rebuild stats_html ────────────────────────────────────
@@ -454,11 +827,12 @@ def count_plays_from_directory(config):
               <li>Days played: {days_played} ({pct_days:.2f}%)</li>
               <li>First play: {first_desc}</li>
               <li>Last play: {last_desc}</li>
+              <li>Total play: {total_plays}</li>
               <li>Total listening time: {total_time_str}</li>
               <li>Average playtime per play: {avg_play_str}</li>
             </ul>
           </div>
-        
+
           <!-- 2. Library Stats -->
           <div class="stats-group">
             <h3>Library</h3>
@@ -481,7 +855,7 @@ def count_plays_from_directory(config):
               </li>
             </ul>
           </div>
-        
+
           <!-- 3. Milestones -->
           <div class="stats-group">
             <h3>Milestones</h3>
@@ -497,7 +871,7 @@ def count_plays_from_directory(config):
               </li>
             </ul>
           </div>
-        
+
           <!-- 4. Popularity Records -->
           <div class="stats-group">
             <h3>Popularity</h3>
@@ -509,7 +883,7 @@ def count_plays_from_directory(config):
               <li>Most skipped track: {most_skipped} ({skip_ct} skips)</li>
             </ul>
           </div>
-        
+
           <!-- 5. Listening Patterns -->
           <div class="stats-group">
             <h3>Patterns</h3>
@@ -526,7 +900,7 @@ def count_plays_from_directory(config):
               <li>Weekend vs Weekday plays: {weekend}/{weekday} ({ratio_pct:.2f}% weekend)</li>
             </ul>
           </div>
-        
+
           <!-- 6. Sessions & Behavior -->
           <div class="stats-group">
             <h3>Sessions & Behavior</h3>
@@ -544,23 +918,23 @@ def count_plays_from_directory(config):
         </div>
 
         <!-- Info modal -->
-        <div id="info-modal" class="modal-overlay" style="display:none;">
+        <div id="info-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="info-modal-text" aria-hidden="true">
           <div class="modal-content">
             <div class="modal-header">
                 <h2 id="info-modal-text"></h2>
-                <span id="close-info-modal" class="close-button">&times;</span>
+                <button id="close-info-modal" class="close-button" aria-label="Close information">&times;</button>
             </div>
           </div>
         </div>
-        
+
          <!-- hidden modal -->
-        <div id="every-year-modal" class="modal-overlay" style="display:none;">
+        <div id="every-year-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="every-year-title" aria-hidden="true">
           <div class="modal-content">
             <div class="modal-header">
-                <h2>Artists played every year({every_year_count})</h2>
-                <span id="close-every-year-modal" class="close-button">&times;</span>
+                <h2 id="every-year-title">Artists played every year({every_year_count})</h2>
+                <button id="close-every-year-modal" class="close-button" aria-label="Close artists list">&times;</button>
             </div>
-            <ul style="list-style:none; padding:0; margin-top:1em; max-height:60vh; overflow:auto;">
+            <ul style="list-style:none; padding:0; margin-top:1em; max-height:60vh; overflow:auto;" role="list" aria-label="Artists played every year">
               {"".join(f"<li>{a}</li>" for a in every_year_list)}
             </ul>
           </div>
@@ -578,11 +952,11 @@ def count_plays_from_directory(config):
     </head>
     <body style='overflow: hidden;'>
         {print_file("html/title_bar.html")}
-        
+
         <div id="year-tabs">{tabs}</div>
         {sections}
         {stats_html}
-        
+
         {print_file("html/settings_modal.html")}
     </body>
     <footer>
@@ -591,9 +965,13 @@ def count_plays_from_directory(config):
     </html>
     """
 
-    with open(output_html, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    print(f"✅ HTML report generated: {output_html}")
+    try:
+        with open(output_html, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        logging.info(f"✅ HTML report generated: {output_html}")
+    except (IOError, PermissionError) as e:
+        logging.error(f"Failed to write HTML report to {output_html}: {e}")
+        raise
 
 
 if __name__ == "__main__":

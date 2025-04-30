@@ -1,23 +1,23 @@
-<div id="settings-modal" class="modal-overlay">
+<div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title" aria-hidden="true">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>Settings</h2>
-            <span class="close-button" id="close-settings">&times;</span>
+            <h2 id="settings-title">Settings</h2>
+            <button class="close-button" id="close-settings" aria-label="Close settings">&times;</button>
         </div>
         <div class="modal-body">
             <div id="mode-toggle-container">
                 <span class="label-text" id="mode-toggle-label">Switch to Playcount:</span>
                 <label class="switch">
-                    <input type="checkbox" checked id="global-mode-toggle"/>
-                    <span class="slider"></span>
+                    <input type="checkbox" checked id="global-mode-toggle" aria-labelledby="mode-toggle-label"/>
+                    <span class="slider" role="presentation"></span>
                 </label>
             </div>
 
             <div class="theme-toggle-wrapper">
                 <span class="label-text" id="theme-toggle-label">Dark Theme:</span>
                 <label class="switch">
-                    <input type="checkbox" checked id="theme-toggle"/>
-                    <span class="slider"></span>
+                    <input type="checkbox" checked id="theme-toggle" aria-labelledby="theme-toggle-label"/>
+                    <span class="slider" role="presentation"></span>
                 </label>
             </div>
         </div>

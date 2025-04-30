@@ -402,7 +402,9 @@ a, a:visited {
 .close-button {
     cursor: pointer;
     font-size: 1.5rem;
+    background-color: transparent;
     color: #ccc;
+    border: none;
 }
 
 .close-button:hover {

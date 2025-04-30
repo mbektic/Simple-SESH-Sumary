@@ -2,7 +2,7 @@
 import os
 import webbrowser
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import importlib.util
 from GenerateHTMLSummary import count_plays_from_directory, VERSION
 
@@ -97,12 +97,81 @@ class ConfigApp:
         # Run Button
         ttk.Button(self.root, text="Generate Summary", command=self.run).grid(row=5, column=0, pady=15)
 
+    def validate_inputs(self):
+        """
+        Validate user inputs before processing.
+
+        Returns:
+            bool: True if all inputs are valid, False otherwise
+        """
+        # Validate minimum milliseconds
+        try:
+            min_ms = int(self.min_millis_var.get())
+            if min_ms < 0:
+                tk.messagebox.showerror("Invalid Input", "Minimum milliseconds must be a positive number. This value determines how long a track must be played to count as a listen.")
+                return False
+        except ValueError:
+            tk.messagebox.showerror("Invalid Input", "Minimum milliseconds must be a number. Please enter a valid integer value (e.g., 20000 for 20 seconds).")
+            return False
+
+        # Validate input directory
+        input_dir = self.input_dir_var.get().strip()
+        if not input_dir:
+            tk.messagebox.showerror("Invalid Input", "Input directory cannot be empty. Please specify the folder where your Spotify JSON files are located.")
+            return False
+        if not os.path.exists(input_dir):
+            response = tk.messagebox.askquestion("Directory Not Found", 
+                f"The directory '{input_dir}' does not exist. Would you like to create it?")
+            if response == 'yes':
+                try:
+                    os.makedirs(input_dir, exist_ok=True)
+                except Exception as e:
+                    tk.messagebox.showerror("Error", f"Failed to create directory: {e}")
+                    return False
+            else:
+                return False
+
+        # Validate output file
+        output_file = self.output_file_var.get().strip()
+        if not output_file:
+            tk.messagebox.showerror("Invalid Input", "Output file name cannot be empty. Please specify a name for the HTML report file that will be generated.")
+            return False
+        try:
+            # Check if the directory part of the path exists
+            output_dir = os.path.dirname(output_file)
+            if output_dir and not os.path.exists(output_dir):
+                response = tk.messagebox.askquestion("Directory Not Found", 
+                    f"The directory for output file '{output_dir}' does not exist. Would you like to create it?")
+                if response == 'yes':
+                    os.makedirs(output_dir, exist_ok=True)
+                else:
+                    return False
+        except Exception as e:
+            tk.messagebox.showerror("Error", f"Invalid output file path: {e}")
+            return False
+
+        # Validate items per page
+        try:
+            items_per_page = int(self.items_per_page_var.get())
+            if items_per_page <= 0:
+                tk.messagebox.showerror("Invalid Input", "Items per page must be a positive number. This controls how many items are displayed per page in the generated HTML report.")
+                return False
+        except ValueError:
+            tk.messagebox.showerror("Invalid Input", "Items per page must be a number. Please enter a valid integer value (e.g., 10).")
+            return False
+
+        return True
+
     def run(self):
+        # Validate inputs before processing
+        if not self.validate_inputs():
+            return
+
         # Update config values from UI
         config.MIN_MILLISECONDS = int(self.min_millis_var.get())
-        config.INPUT_DIR = self.input_dir_var.get()
-        config.OUTPUT_FILE = self.output_file_var.get()
-        config.ITEMS_PER_PAGE = self.items_per_page_var.get()
+        config.INPUT_DIR = self.input_dir_var.get().strip()
+        config.OUTPUT_FILE = self.output_file_var.get().strip()
+        config.ITEMS_PER_PAGE = int(self.items_per_page_var.get())
 
         # Run your main function
         count_plays_from_directory(config)
