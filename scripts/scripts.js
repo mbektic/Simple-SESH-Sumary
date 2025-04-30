@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "flex";
     });
 
-    // Close modal when close button is clicked
+    // Close modal when the close button is clicked
     closeBtn.addEventListener("click", () => {
         modal.style.display = "none";
     });

@@ -27,7 +27,7 @@ tr:hover {
     border-color: #007bff;
 }
 
-th, td, a{
+th, td, a {
     font-weight: bold;
 }
 
@@ -36,7 +36,7 @@ th, td, a{
 }
 
 #stats {
-  background-color: #ffffff;
-  color: #333333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    color: #333333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }

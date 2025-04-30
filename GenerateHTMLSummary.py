@@ -5,7 +5,7 @@ from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.7.0"
+VERSION = "1.7.1"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -261,7 +261,7 @@ def count_plays_from_directory(config):
         stats_html = f"""
         <div id="stats">
           <h2>Stats</h2>
-          <ul   >
+          <ul>
             <li>Days since first play: {days_since_first}</li>
             <li>Days played: {days_played} ({pct_days:.2f}%)</li>
             <li>First play: {first_desc}</li>
@@ -282,7 +282,7 @@ def count_plays_from_directory(config):
         <div id="every-year-modal" class="modal-overlay" style="display:none;">
           <div class="modal-content">
             <div class="modal-header">
-                <h2>Artists played every year ({every_year_count})</h2>
+                <h2>Artists played every year({every_year_count})</h2>
                 <span id="close-every-year-modal" class="close-button">&times;</span>
             </div>
             <ul style="list-style:none; padding:0; margin-top:1em; max-height:60vh; overflow:auto;">
