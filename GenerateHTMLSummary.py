@@ -5,7 +5,7 @@ from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.6.1"
+VERSION = "1.6.2"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -86,7 +86,7 @@ def count_plays_from_directory(config):
             continue
 
         for entry in data:
-            if entry.get("ms_played") is not None:
+            if entry.get("ms_played") is not None and entry["ms_played"] > 0:
                 if entry.get("master_metadata_album_artist_name"):
                     artist = entry.get("master_metadata_album_artist_name")
                     track = entry.get("master_metadata_track_name") + " - " + artist
@@ -193,7 +193,6 @@ def count_plays_from_directory(config):
     # per-year sections
     for yr in years:
         style = "none"
-        prefix = f"{yr}-"
         sections += f'<div class="year-section" id="year-{yr}" style="display: {style};">'
         sections += build_table("🎤 Artists",
                                 yearly[yr]["artist_time"], yearly[yr]["artist_counts"],

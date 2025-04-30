@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] 2025-04-29
+### Changed
+- Check to ensure the total time played is more than 0 ms to get rid of useless data.
+
 ## [1.6.1] 2025-04-29
 ### Changed
 - Search now persists when switching between tabs. 
@@ -52,9 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.2] 2025-04-21
 ### Changed
-- Increase fade out time to one second, so on small datasets it doesn't just look like the screen is flashing
+- Increased the fade out time to one second, so on small datasets it doesn't just look like the screen is flashing
 - The size of the loading text and spinner was updated.
-- No longer remove the loading screen from the layout incase I need it again. 
+- No longer remove the loading screen from the layout in case I need it again. 
 
 ## [1.3.1] 2025-04-21
 ### Added
@@ -131,7 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added a new `PLAYTIME_MODE` flag that will make the script generate the ranking based off of milliseconds listened instead of raw playcount.
 - Added `CHANGELOG.md`
-- Added a version number to the bottom of the HTML page so users can quickly see what version they are using and if there's a new one available
+- Added version number to the bottom of the HTML page so users can quickly see what version they are using and if there's a new one available
 
 ### Changed
 - Minor Style changes.
