@@ -249,8 +249,6 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -
     })
     first_date = stats_data.get('first_str', "")
     last_date  = stats_data.get('last_str', "")
-    logging.info(stats_data)
-    logging.info(f"Generating stats HTML for {first_date} to {last_date}")
 
     return f"""
     <h2>Stats</h2>
@@ -343,7 +341,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -
         <ul>
           <li>Number of sessions: {stats_data['num_sessions']}
              <button class="info-button stats-button"
-                     data-info="A "session" is consecutive plays with <30 min gaps.">i</button>
+                     data-info='A "session" is consecutive plays with <30 min gaps.'>i</button>
           </li>
           <li>Average session length: {stats_data['avg_str']}</li>
           <li>Longest single session: {stats_data['long_str']} on {stats_data['long_date_str']}</li>
