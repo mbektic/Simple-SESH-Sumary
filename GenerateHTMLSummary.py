@@ -6,7 +6,7 @@ from Gui import *
 from collections import defaultdict, Counter
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.9.0"
+VERSION = "1.9.1"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -446,78 +446,99 @@ def count_plays_from_directory(config):
         stats_html = f"""
         <h2>Stats</h2>
         <div id="stats">
+          <!-- 1. Overview & Time -->
           <div class="stats-group">
-            <h3>General</h3>
+            <h3>Overview & Time</h3>
             <ul>
-                <li>Days since first play: {days_since_first}</li>
-                <li>Days played: {days_played} ({pct_days:.2f}%)</li>
-                <li>First play: {first_desc}</li>
-                <li>Last play: {last_desc}</li>
-                <li>Total listening time: {total_time_str}</li>
-                <li>Average playtime per play: {avg_play_str}</li>
-                <li>Most skipped track: {most_skipped} ({skip_ct} skips)</li>
+              <li>Days since first play: {days_since_first}</li>
+              <li>Days played: {days_played} ({pct_days:.2f}%)</li>
+              <li>First play: {first_desc}</li>
+              <li>Last play: {last_desc}</li>
+              <li>Total listening time: {total_time_str}</li>
+              <li>Average playtime per play: {avg_play_str}</li>
             </ul>
           </div>
         
+          <!-- 2. Library Stats -->
           <div class="stats-group">
-            <h3>Your Library</h3>
+            <h3>Library</h3>
             <ul>
-                <li>Artists: {artists_count}</li>
-                <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
-                <li>
-                  Every-year artists: {every_year_count}
-                  <button id="show-every-year-btn" class="stats-button">Show</button>
-                </li>
-                <li>Albums: {albums_count}</li>
-                <li>Albums per artist: {albums_per_artist:.1f}</li>
-                <li>Tracks: {tracks_count}</li>
-                <li>Unique Tracks Ratio: {unique_tracks}/{total_plays} ({unique_ratio_pct:.2f}%)
-                  <button class="info-button stats-button"
-                           data-info="Unique Tracks / Total Plays * 100">i</button>  
-                </li>
-                <li>Gini Coefficient (artists): {gini:.3f}
-                  <button class="info-button stats-button"
-                           data-info="A single 0–1 number measuring how evenly you spread listens across artists (0 = perfectly even, 1 = only 1 artist).">i</button>  
-                </li>
+              <li>Artists: {artists_count}</li>
+              <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
+              <li>
+                Every-year artists: {every_year_count}
+                <button id="show-every-year-btn" class="stats-button">Show</button>
+              </li>
+              <li>Albums: {albums_count}</li>
+              <li>Albums per artist: {albums_per_artist:.1f}</li>
+              <li>Tracks: {tracks_count}</li>
+              <li>Unique tracks ratio: {unique_tracks}/{total_plays} ({unique_ratio_pct:.2f}%)
+                <button class="info-button stats-button" data-info="Unique Tracks ÷ Total Plays × 100">i</button>
+              </li>
+              <li>Gini coefficient: {gini:.3f}
+                <button class="info-button stats-button" 
+                        data-info="How evenly you spread listens across artists (0 = perfectly even, 1 = one artist).">i</button>
+              </li>
             </ul>
           </div>
         
+          <!-- 3. Milestones -->
           <div class="stats-group">
             <h3>Milestones</h3>
             <ul>
-                <li>Eddington number: {edd}
-                   <button class="info-button stats-button"
-                           data-info="This means you have {edd} days with at least {edd} plays.">i</button>
-                </li>
-                <li>Days to next Eddington ({edd + 1}): {next_need}</li>
-                <li>Artist cut-over point: {art_cut}
-                   <button class="info-button stats-button"
-                           data-info="This means you have {art_cut} artists with at least {art_cut} plays.">i</button>
-                </li>
-                <li>Most popular year: {pop_year} ({pop_year_plays} plays)</li>
-                <li>Most popular month: {pop_mon_str} ({pop_mon_plays} plays)</li>
-                <li>Most popular week: {week_str} ({week_plays} plays)</li>
-                <li>Most popular day: {day_str} ({day_plays} plays)</li>
+              <li>Eddington number: {edd}
+                 <button class="info-button stats-button"
+                         data-info="This means you have {edd} days with at least {edd} plays.">i</button>
+              </li>
+              <li>Days to next Eddington ({edd+1}): {next_need}</li>
+              <li>Artist cut-over point: {art_cut}
+                 <button class="info-button stats-button"
+                         data-info="This means you have {art_cut} artists with at least {art_cut} plays.">i</button>
+              </li>
             </ul>
           </div>
         
+          <!-- 4. Popularity Records -->
           <div class="stats-group">
-            <h3>Listening Patterns</h3>
+            <h3>Popularity</h3>
             <ul>
-                <li>Longest listening streak: {max_streak} days ({streak_start.strftime("%b %d, %Y")} – {streak_end.strftime("%b %d, %Y")})</li>
-                <li>Longest hiatus: {longest_hiatus} days {f"({hi_start_str} – {hi_end_str})" if longest_hiatus>0 else ""}</li>
-                <li>Average plays per active day: {avg_plays:.2f}</li>
-                <li>Most active weekday: {wd_name} ({wd_count} plays)</li>
-                <li>Peak listening hour: {peak_hour_str} ({hour_count} plays)</li>
-                <li>Weekend vs Weekday plays: {weekend}/{weekday} ({ratio_pct:.2f}%)</li>
-                <li>Number of listening sessions: {num_sessions}
-                    <button class="info-button stats-button"
-                           data-info="A “session” is defined as consecutive plays with < 30 a minute gaps">i</button>
-                </li>
-                <li>Average session length: {avg_str}</li>
-                <li>Longest single session: {long_str} on {long_date_str}</li>
-                <li>Skip rate: {skip_count}/{play_counted} ({skip_rate_pct:.2f}%)</li>
-                <li>Offline vs Online ratio: {ratio_str} ({offline_ratio_pct:.2f}% offline)</li>
+              <li>Most popular year: {pop_year} ({pop_year_plays} plays)</li>
+              <li>Most popular month: {pop_mon_str} ({pop_mon_plays} plays)</li>
+              <li>Most popular week: {week_str} ({week_plays} plays)</li>
+              <li>Most popular day: {day_str} ({day_plays} plays)</li>
+              <li>Most skipped track: {most_skipped} ({skip_ct} skips)</li>
+            </ul>
+          </div>
+        
+          <!-- 5. Listening Patterns -->
+          <div class="stats-group">
+            <h3>Patterns</h3>
+            <ul>
+              <li>Longest listening streak: {max_streak} days
+                 ({streak_start.strftime("%b %d, %Y")} – {streak_end.strftime("%b %d, %Y")})
+              </li>
+              <li>Longest hiatus: {longest_hiatus} days
+                 {f"({hi_start_str} – {hi_end_str})" if longest_hiatus>0 else ""}
+              </li>
+              <li>Average plays per active day: {avg_plays:.2f}</li>
+              <li>Most active weekday: {wd_name} ({wd_count} plays)</li>
+              <li>Peak listening hour: {peak_hour_str} ({hour_count} plays)</li>
+              <li>Weekend vs Weekday plays: {weekend}/{weekday} ({ratio_pct:.2f}% weekend)</li>
+            </ul>
+          </div>
+        
+          <!-- 6. Sessions & Behavior -->
+          <div class="stats-group">
+            <h3>Sessions & Behavior</h3>
+            <ul>
+              <li>Number of sessions: {num_sessions}
+                 <button class="info-button stats-button"
+                         data-info="A “session” is consecutive plays with <30 min gaps.">i</button>
+              </li>
+              <li>Average session length: {avg_str}</li>
+              <li>Longest single session: {long_str} on {long_date_str}</li>
+              <li>Skip rate: {skip_count}/{play_counted} ({skip_rate_pct:.2f}%)</li>
+              <li>Offline vs Online ratio: {ratio_str} ({offline_ratio_pct:.2f}% offline)</li>
             </ul>
           </div>
         </div>
@@ -548,14 +569,14 @@ def count_plays_from_directory(config):
 
     html_content = f"""
     <!DOCTYPE html>
-    <html>
+    <html style='overflow: hidden;'>
     <head>
         <meta charset="UTF-8">
         <title>Spotify Summary</title>
         {print_styles()}
         {generate_js()}
     </head>
-    <body>
+    <body style='overflow: hidden;'>
         {print_file("html/title_bar.html")}
         
         <div id="year-tabs">{tabs}</div>

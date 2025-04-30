@@ -17,6 +17,12 @@ window.onload = () => {
 
         // Trigger the fade-out
         overlay.classList.add('fade-out');
+
+        // Re-enable scrolling after fade-out transition
+        overlay.addEventListener('transitionend', () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }, {once: true});
     });
 };
 
@@ -244,13 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('every-year-modal').style.display = 'none';
     });
 
-    // click outside to close
-    window.addEventListener('click', e => {
-        if (e.target.id === 'every-year-modal') {
-            e.target.style.display = 'none';
-        }
-    });
-
     // Info-button modal
     document.querySelectorAll('.info-button').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -259,13 +258,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    ['click', 'touchstart'].forEach(evt => {
+        window.addEventListener(evt, e => {
+            if (e.target.id === 'every-year-modal') {
+                e.target.style.display = 'none';
+            } else if (e.target.id === 'info-modal') {
+                e.target.style.display = 'none';
+            }
+        });
+    });
+
     // close the info modal
     document.getElementById('close-info-modal').addEventListener('click', () => {
         document.getElementById('info-modal').style.display = 'none';
-    });
-    window.addEventListener('click', e => {
-        if (e.target.id === 'info-modal') {
-            e.target.style.display = 'none';
-        }
     });
 });
