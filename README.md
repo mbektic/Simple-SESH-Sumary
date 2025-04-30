@@ -45,3 +45,4 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ### Stats
 ![Image](https://github.com/user-attachments/assets/0798f9eb-6d7c-4141-843f-c965f1b86c2c)
 ![Image](https://github.com/user-attachments/assets/bfa47186-ae50-4c73-a2b4-77e7fdf0b0db)
+![Image](https://github.com/user-attachments/assets/29c716bd-3300-4ade-afdf-1f97cb6d92fd)

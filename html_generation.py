@@ -4,6 +4,7 @@ HTML generation module for Spotify Extended Streaming History.
 This module contains functions for generating HTML content for the
 Spotify Extended Streaming History summary report.
 """
+import json
 import logging
 from typing import Dict, List, Any, DefaultDict
 
@@ -231,7 +232,7 @@ def build_year_sections(years: List[int], yearly: DefaultDict[int, Dict[str, Def
         sections += "</div>"
     return sections
 
-def build_stats_html(stats_data: Dict[str, Any]) -> str:
+def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -> str:
     """
     Build HTML for the statistics section.
 
@@ -241,6 +242,16 @@ def build_stats_html(stats_data: Dict[str, Any]) -> str:
     Returns:
         str: HTML for the statistics section as a string
     """
+
+    daily_counts_json = json.dumps({
+        d.isoformat(): cnt
+        for d, cnt in daily_counts.items()
+    })
+    first_date = stats_data.get('first_str', "")
+    last_date  = stats_data.get('last_str', "")
+    logging.info(stats_data)
+    logging.info(f"Generating stats HTML for {first_date} to {last_date}")
+
     return f"""
     <h2>Stats</h2>
     <div id="stats">
@@ -364,6 +375,27 @@ def build_stats_html(stats_data: Dict[str, Any]) -> str:
         </ul>
       </div>
     </div>
+    
+      <div id="heatmap-holder" class="stats-group">
+        <h3>Activity Heatmap</h3>
+        <div id="calendar-heatmap"></div>
+        <div class="heatmap-legend">
+          <span>Less</span>
+          <div class="heatmap-cell level-0"></div>
+          <div class="heatmap-cell level-1"></div>
+          <div class="heatmap-cell level-2"></div>
+          <div class="heatmap-cell level-3"></div>
+          <div class="heatmap-cell level-4"></div>
+          <span>More</span>
+        </div>
+      </div>
+    
+      <script>
+        const startDate = new Date("{first_date}");
+        const endDate   = new Date("{last_date}");
+        const counts = JSON.parse(`{daily_counts_json}`);
+        {print_file("scripts/heatmap.js")}
+      </script>
     """
 
 def generate_html_content(tabs: str, sections: str, stats_html: str, items_per_page: int, github_url: str, version: str) -> str:

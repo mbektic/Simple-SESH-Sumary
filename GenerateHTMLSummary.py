@@ -6,7 +6,6 @@ JSON files. It uses the data_processing, statistics, and html_generation modules
 to process the data, calculate statistics, and generate the HTML report.
 """
 import argparse
-import logging
 import sys
 from typing import Any
 
@@ -18,7 +17,7 @@ from statistics import calculate_all_stats
 from logging_config import configure_logging, log_exception, log_system_info
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.12.0"
+VERSION = "1.13.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 # Parse command line arguments
@@ -137,7 +136,7 @@ def count_plays_from_directory(config: Any, progress_callback=None) -> None:
             all_section = build_all_section(all_data)
             year_sections = build_year_sections(years, yearly)
             sections = all_section + year_sections
-            stats_html = build_stats_html(stats_data)
+            stats_html = build_stats_html(stats_data, daily_counts)
         except Exception as e:
             logging.error(f"Error building HTML content: {e}")
             log_exception()

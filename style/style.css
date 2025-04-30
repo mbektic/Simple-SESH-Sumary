@@ -192,14 +192,13 @@ a, a:visited {
 /****************************
 * Stats Card
 *****************************/
-#stats {
+#stats,
+#heatmap-holder {
     max-width: 75%;
     margin: 16px auto;
     padding: 1.5em;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background-color: #fff; /* light default, overridden in dark.css */
-    color: #333; /* light text */
 }
 
 #stats h2 {
@@ -241,7 +240,8 @@ a, a:visited {
     padding: 1em;
 }
 
-.stats-group {
+.stats-group,
+#calendar-heatmap {
     background: #fafafa;
     padding: 1em;
     border-radius: 8px;
@@ -471,6 +471,60 @@ a, a:visited {
     font-size: 1.2rem;
 }
 
+/* container will wrap as many days as needed */
+#calendar-heatmap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 10px auto 20px;
+}
+
+/* legend for color levels */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 5px auto 15px;
+}
+
+.heatmap-legend .heatmap-cell {
+    margin: 0;
+}
+
+.heatmap-legend span {
+    margin: 0 4px;
+}
+
+.heatmap-cell {
+    width: 12px;
+    height: 12px;
+    margin: 1px;
+    background-color: #ebedf0;
+    border-radius: 2px;
+}
+
+.heatmap-cell.level-1 {
+    background-color: #c6e48b;
+}
+
+.heatmap-cell.level-2 {
+    background-color: #7bc96f;
+}
+
+.heatmap-cell.level-3 {
+    background-color: #239a3b;
+}
+
+.heatmap-cell.level-4 {
+    background-color: #196127;
+}
+
+.heatmap-cell.level-5 {
+    background-color: #0f4413;
+}
+
+
 /****************************
 * MOBILE STYLE
 *****************************/
@@ -596,12 +650,18 @@ a, a:visited {
         grid-template-columns: repeat(auto-fit, minmax(90%, 1fr));
     }
 
-    #stats h3 {
+    #heatmap-holder {
+        max-width: 93%;
+    }
+
+    #stats h3,
+    #heatmap-holder h3 {
         font-size: 3em;
     }
 
     #every-year-modal li,
-    #stats li {
+    #stats li,
+    #heatmap-holder span {
         font-size: 2em;
     }
 

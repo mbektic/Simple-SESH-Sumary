@@ -1,3 +1,6 @@
+import os
+import logging
+
 # Minimum number of milliseconds that you listened to the song.
 #     Changing this will drastically alter the final counts.
 MIN_MILLISECONDS = 20000
@@ -15,3 +18,56 @@ OUTPUT_FILE = "summary"
 
 # The number of items per table page.
 ITEMS_PER_PAGE = 10
+
+
+def validate_config():
+    """
+    Validate configuration values and ensure they are within acceptable ranges.
+    Creates directories if they don't exist and fixes invalid values.
+
+    Returns:
+        bool: True if validation succeeded, False if critical errors were found
+    """
+    global MIN_MILLISECONDS, INPUT_DIR, OUTPUT_FILE, ITEMS_PER_PAGE
+
+    # Validate MIN_MILLISECONDS
+    if not isinstance(MIN_MILLISECONDS, int) or MIN_MILLISECONDS < 0:
+        logging.warning(f"Invalid MIN_MILLISECONDS value: {MIN_MILLISECONDS}. Setting to default (20000).")
+        MIN_MILLISECONDS = 20000
+
+    # Validate INPUT_DIR
+    if not INPUT_DIR or not isinstance(INPUT_DIR, str):
+        logging.error("INPUT_DIR cannot be empty and must be a string.")
+        return False
+
+    # Create input directory if it doesn't exist
+    try:
+        if not os.path.exists(INPUT_DIR):
+            logging.info(f"Creating input directory: {INPUT_DIR}")
+            os.makedirs(INPUT_DIR, exist_ok=True)
+    except Exception as e:
+        logging.error(f"Failed to create input directory: {e}")
+        return False
+
+    # Validate OUTPUT_FILE
+    if not OUTPUT_FILE or not isinstance(OUTPUT_FILE, str):
+        logging.error("OUTPUT_FILE cannot be empty and must be a string.")
+        return False
+
+    # Check if the directory part of the output file path exists
+    output_dir = os.path.dirname(OUTPUT_FILE)
+    if output_dir:
+        try:
+            if not os.path.exists(output_dir):
+                logging.info(f"Creating output directory: {output_dir}")
+                os.makedirs(output_dir, exist_ok=True)
+        except Exception as e:
+            logging.error(f"Failed to create output directory: {e}")
+            return False
+
+    # Validate ITEMS_PER_PAGE
+    if not isinstance(ITEMS_PER_PAGE, int) or ITEMS_PER_PAGE <= 0:
+        logging.warning(f"Invalid ITEMS_PER_PAGE value: {ITEMS_PER_PAGE}. Setting to default (10).")
+        ITEMS_PER_PAGE = 10
+
+    return True
