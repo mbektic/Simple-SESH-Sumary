@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import json
 import sys
 import calendar
@@ -6,7 +6,7 @@ from Gui import *
 from collections import defaultdict, Counter
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.8.0"
+VERSION = "1.9.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -72,11 +72,15 @@ def count_plays_from_directory(config):
     album_set = set()
     track_set = set()
     artist_tracks = defaultdict(set)
-    daily_counts   = Counter()
+    daily_counts = Counter()
     monthly_counts = Counter()
     weekday_counts = Counter()
     hour_counts = Counter()
-
+    play_times = []
+    play_counted = 0
+    skip_count = 0
+    offline_count = 0
+    track_skip_counts = Counter()
 
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
@@ -125,7 +129,15 @@ def count_plays_from_directory(config):
                         daily_counts[dt.date()] += 1
                         monthly_counts[(dt.year, dt.month)] += 1
                         weekday_counts[dt.weekday()] += 1
-                        hour_counts[dt.hour]        += 1
+                        hour_counts[dt.hour] += 1
+                        play_times.append(dt)
+                        play_counted += 1
+                        if entry.get("offline"):
+                            offline_count += 1
+
+                    if entry.get("skipped"):
+                        skip_count += 1
+                        track_skip_counts[track] += 1
 
                     artist_set.add(artist)
                     track_set.add(track)
@@ -278,15 +290,31 @@ def count_plays_from_directory(config):
         art_vals = sorted(all_data["artist_counts"].values(), reverse=True)
         art_cut = next((i for i, n in enumerate(art_vals, start=1) if n < i), len(art_vals))
 
-        # ─── Most popular year & month ─────────────────────────────
+        # ─── Most popular year/month/week/dau ─────────────────────────────
         year_plays = {y: sum(d["track_counts"].values()) for y, d in yearly.items()}
         pop_year, pop_year_plays = max(year_plays.items(), key=lambda kv: kv[1])
 
         (pm_y, pm_m), pop_mon_plays = max(monthly_counts.items(), key=lambda kv: kv[1])
         pop_mon_str = f"{calendar.month_name[pm_m]} {pm_y}"
 
+        weekly_counts = Counter()
+        for d, cnt in daily_counts.items():
+            # d.isocalendar() → (year, weeknumber, weekday)
+            yr, wk, _ = d.isocalendar()
+            weekly_counts[(yr, wk)] += cnt
+        (wy, ww), week_plays = weekly_counts.most_common(1)[0]
+        week_start = datetime.strptime(f"{wy}-W{ww}-1", "%G-W%V-%u").date()
+        week_end = week_start + timedelta(days=6)
+        week_str = f"{week_start.strftime('%b %d')} – {week_end.strftime('%b %d, %Y')}"
+
+        # — Most popular day (single date) —
+        if daily_counts:
+            most_day, day_plays = daily_counts.most_common(1)[0]
+            day_str = most_day.strftime("%b %d, %Y")
+        else:
+            week_str, week_plays, day_str, day_plays = "N/A", 0, "N/A", 0
+
         # — Longest Listening Streak (with date range) —
-        from datetime import timedelta
 
         sorted_dates = sorted(dates_set)
         # initialize
@@ -319,6 +347,101 @@ def count_plays_from_directory(config):
         suffix = "AM" if peak_hour < 12 else "PM"
         peak_hour_str = f"{hour12}{suffix}"
 
+        # ─── Unique Tracks Ratio ───────────────────────────────────
+        total_plays = sum(all_data["track_counts"].values())
+        unique_tracks = len(track_set)
+        unique_ratio_pct = unique_tracks / total_plays * 100
+
+        # ─── Gini Coefficient of Artist Plays ─────────────────────
+        vals = sorted(all_data["artist_counts"].values())
+        n = len(vals)
+        if n and sum(vals):
+            weighted = sum((i + 1) * v for i, v in enumerate(vals))
+            gini = (2 * weighted) / (n * sum(vals)) - (n + 1) / n
+        else:
+            gini = 0
+
+        # ─── Weekend vs Weekday Ratio ────────────────────────────
+        weekend = weekday_counts[5] + weekday_counts[6]  # Sat=5, Sun=6
+        weekday = sum(weekday_counts[i] for i in range(5))
+        ratio_pct = weekend / weekday * 100 if weekday else 0
+
+        # ─── Listening session stats ───────────────────────────
+        play_times.sort()
+        sessions = []
+        if play_times:
+            start = prev = play_times[0]
+            gap = timedelta(minutes=30)
+            for t in play_times[1:]:
+                if t - prev > gap:
+                    sessions.append((start, prev))
+                    start = t
+                prev = t
+            sessions.append((start, prev))
+
+        num_sessions = len(sessions)
+        durations = [(end - start) for start, end in sessions]
+        total_dur = sum(durations, timedelta())
+        avg_session = total_dur / num_sessions if num_sessions else timedelta()
+
+        if durations:
+            # find the longest session and its start
+            longest_dur = max(durations)
+            idx = durations.index(longest_dur)
+            longest_start, longest_end = sessions[idx]
+        else:
+            longest_dur = timedelta()
+            longest_start = longest_end = None
+
+        # format durations
+        avg_str = ms_to_hms(int(avg_session.total_seconds() * 1000))
+        avg_str = avg_str[:-6]
+        long_str = ms_to_hms(int(longest_dur.total_seconds() * 1000))
+        long_str = long_str[:-6]
+        # format date for the longest session
+        if longest_start:
+            long_date_str = longest_start.strftime("%b %d, %Y")
+        else:
+            long_date_str = "N/A"
+
+        # ─── Skip rate & offline/online ratio ─────────────────────
+        online_count = play_counted - offline_count
+        skip_rate_pct = (skip_count / play_counted * 100) if play_counted else 0
+        offline_ratio_pct = (offline_count / play_counted * 100) if play_counted else 0
+        ratio_str = f"{offline_count}:{online_count}"
+
+        # ─── Total listening time & average per play ─────────────
+        total_ms = sum(all_data["track_time"].values())
+        total_plays = sum(all_data["track_counts"].values())
+        total_time_str = ms_to_hms(total_ms)
+        total_time_str = total_time_str[:-6]
+        avg_play_ms = total_ms / total_plays if total_plays else 0
+        avg_play_str = ms_to_hms(int(avg_play_ms))
+        avg_play_str = avg_play_str[:-6]
+
+        # ─── Most skipped track ───────────────────────────────────
+        if track_skip_counts:
+            most_skipped, skip_ct = track_skip_counts.most_common(1)[0]
+        else:
+            most_skipped, skip_ct = "N/A", 0
+
+        # ─── Longest Hiatus ───────────────────────────────────────
+        longest_hiatus = 0
+        hiatus_start = hiatus_end = None
+
+        for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
+            gap = (next_day - prev_day).days - 1
+            if gap > longest_hiatus:
+                longest_hiatus = gap
+                hiatus_start = prev_day + timedelta(days=1)
+                hiatus_end = next_day - timedelta(days=1)
+
+        if longest_hiatus > 0:
+            hi_start_str = hiatus_start.strftime("%b %d, %Y")
+            hi_end_str = hiatus_end.strftime("%b %d, %Y")
+        else:
+            hi_start_str = hi_end_str = None
+
         # ─── rebuild stats_html ────────────────────────────────────
         stats_html = f"""
         <h2>Stats</h2>
@@ -326,54 +449,75 @@ def count_plays_from_directory(config):
           <div class="stats-group">
             <h3>General</h3>
             <ul>
-              <li>Days since first play: {days_since_first}</li>
-              <li>Days played: {days_played} ({pct_days:.2f}%)</li>
-              <li>First play: {first_desc}</li>
-              <li>Last play: {last_desc}</li>
+                <li>Days since first play: {days_since_first}</li>
+                <li>Days played: {days_played} ({pct_days:.2f}%)</li>
+                <li>First play: {first_desc}</li>
+                <li>Last play: {last_desc}</li>
+                <li>Total listening time: {total_time_str}</li>
+                <li>Average playtime per play: {avg_play_str}</li>
+                <li>Most skipped track: {most_skipped} ({skip_ct} skips)</li>
             </ul>
           </div>
         
           <div class="stats-group">
             <h3>Your Library</h3>
             <ul>
-              <li>Artists: {artists_count}</li>
-              <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
-              <li>
-                Every-year artists: {every_year_count}
-                <button id="show-every-year-btn" class="stats-button">Show</button>
-              </li>
-              <li>Albums: {albums_count}</li>
-              <li>Albums per artist: {albums_per_artist:.1f}</li>
-              <li>Tracks: {tracks_count}</li>
+                <li>Artists: {artists_count}</li>
+                <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
+                <li>
+                  Every-year artists: {every_year_count}
+                  <button id="show-every-year-btn" class="stats-button">Show</button>
+                </li>
+                <li>Albums: {albums_count}</li>
+                <li>Albums per artist: {albums_per_artist:.1f}</li>
+                <li>Tracks: {tracks_count}</li>
+                <li>Unique Tracks Ratio: {unique_tracks}/{total_plays} ({unique_ratio_pct:.2f}%)
+                  <button class="info-button stats-button"
+                           data-info="Unique Tracks / Total Plays * 100">i</button>  
+                </li>
+                <li>Gini Coefficient (artists): {gini:.3f}
+                  <button class="info-button stats-button"
+                           data-info="A single 0–1 number measuring how evenly you spread listens across artists (0 = perfectly even, 1 = only 1 artist).">i</button>  
+                </li>
             </ul>
           </div>
         
           <div class="stats-group">
             <h3>Milestones</h3>
             <ul>
-              <li>Eddington number: {edd}
-                 <button class="info-button"
-                         data-info="This means you have {edd} days with at least {edd} plays.">ℹ️</button>
-              </li>
-              <li>Days to next Eddington ({edd+1}): {next_need}</li>
-              <li>Artist cut-over point: {art_cut}
-                 <button class="info-button"
-                         data-info="This means you have {art_cut} artists with at least {art_cut} plays.">ℹ️</button>
-              </li>
-              <li>Most popular year: {pop_year} ({pop_year_plays} plays)</li>
-              <li>Most popular month: {pop_mon_str} ({pop_mon_plays} plays)</li>
+                <li>Eddington number: {edd}
+                   <button class="info-button stats-button"
+                           data-info="This means you have {edd} days with at least {edd} plays.">i</button>
+                </li>
+                <li>Days to next Eddington ({edd + 1}): {next_need}</li>
+                <li>Artist cut-over point: {art_cut}
+                   <button class="info-button stats-button"
+                           data-info="This means you have {art_cut} artists with at least {art_cut} plays.">i</button>
+                </li>
+                <li>Most popular year: {pop_year} ({pop_year_plays} plays)</li>
+                <li>Most popular month: {pop_mon_str} ({pop_mon_plays} plays)</li>
+                <li>Most popular week: {week_str} ({week_plays} plays)</li>
+                <li>Most popular day: {day_str} ({day_plays} plays)</li>
             </ul>
           </div>
         
           <div class="stats-group">
             <h3>Listening Patterns</h3>
             <ul>
-              <li>Longest listening streak: {max_streak} days
-                  ({streak_start.strftime("%b %d, %Y")} – {streak_end.strftime("%b %d, %Y")})
-              </li>
-              <li>Average plays per active day: {avg_plays:.2f}</li>
-              <li>Most active weekday: {wd_name} ({wd_count} plays)</li>
-              <li>Peak listening hour: {peak_hour_str} ({hour_count} plays)</li>
+                <li>Longest listening streak: {max_streak} days ({streak_start.strftime("%b %d, %Y")} – {streak_end.strftime("%b %d, %Y")})</li>
+                <li>Longest hiatus: {longest_hiatus} days {f"({hi_start_str} – {hi_end_str})" if longest_hiatus>0 else ""}</li>
+                <li>Average plays per active day: {avg_plays:.2f}</li>
+                <li>Most active weekday: {wd_name} ({wd_count} plays)</li>
+                <li>Peak listening hour: {peak_hour_str} ({hour_count} plays)</li>
+                <li>Weekend vs Weekday plays: {weekend}/{weekday} ({ratio_pct:.2f}%)</li>
+                <li>Number of listening sessions: {num_sessions}
+                    <button class="info-button stats-button"
+                           data-info="A “session” is defined as consecutive plays with < 30 a minute gaps">i</button>
+                </li>
+                <li>Average session length: {avg_str}</li>
+                <li>Longest single session: {long_str} on {long_date_str}</li>
+                <li>Skip rate: {skip_count}/{play_counted} ({skip_rate_pct:.2f}%)</li>
+                <li>Offline vs Online ratio: {ratio_str} ({offline_ratio_pct:.2f}% offline)</li>
             </ul>
           </div>
         </div>

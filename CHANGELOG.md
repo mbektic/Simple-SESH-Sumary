@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] 2025-04-29
+### Added
+- Unique Tracks Ratio stat
+- Gini Coefficient of Artist Plays stat
+- Weekend vs. Weekday Ratio stat
+- Number of listening sessions stat
+- Average session length stat
+- Longest single session stat
+- Skip rate stat
+- Offline vs. Online ratio stat
+- Total listening time stat
+- Average playtime per play stat
+- Most skipped track stat
+- Longest hiatus stat
+- Most popular week/day stats
+
+### Changed 
+- Changed the info button on stats to match the theme.
+
 ## [1.8.0] 2025-04-29
 ### Added 
 - Eddington number stats

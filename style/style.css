@@ -234,21 +234,6 @@ a, a:visited {
     background-color: #17a34a;
 }
 
-.info-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-left: 0.3em;
-    padding: 0;
-    color: #1DB954;
-    transition: color 0.2s ease;
-}
-
-.info-button:hover {
-    color: #17a34a;
-}
-
 #stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
