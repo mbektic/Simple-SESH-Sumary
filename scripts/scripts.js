@@ -234,4 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
+
+    document.getElementById('show-every-year-btn').addEventListener('click', () => {
+        document.getElementById('every-year-modal').style.display = 'flex';
+    });
+// close button
+    document.getElementById('close-every-year-modal').addEventListener('click', () => {
+        document.getElementById('every-year-modal').style.display = 'none';
+    });
+// click outside to close
+    window.addEventListener('click', e => {
+        if (e.target.id === 'every-year-modal') {
+            e.target.style.display = 'none';
+        }
+    });
 });

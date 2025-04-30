@@ -34,3 +34,9 @@ th, td, a{
 .highlight {
     font-weight: bolder;
 }
+
+#stats {
+  background-color: #ffffff;
+  color: #333333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}

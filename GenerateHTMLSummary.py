@@ -1,11 +1,11 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
 import sys
 from Gui import *
 from collections import defaultdict
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.6.2"
+VERSION = "1.7.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -62,6 +62,16 @@ def count_plays_from_directory(config):
         "album_time": defaultdict(int),
     })
 
+    dates_set = set()
+    first_ts = None
+    first_entry = None
+    last_ts = None
+    last_entry = None
+    artist_set = set()
+    album_set = set()
+    track_set = set()
+    artist_tracks = defaultdict(set)
+
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
     output_html = config.OUTPUT_FILE + ".html"
@@ -94,6 +104,22 @@ def count_plays_from_directory(config):
 
                     year = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00")).year
                     y = yearly[year]
+
+                    # ─── update stats info ─────────────────────────────────
+                    dt = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00"))
+                    dates_set.add(dt.date())
+                    if first_ts is None or dt < first_ts:
+                        first_ts = dt
+                        first_entry = entry
+                    if last_ts is None or dt > last_ts:
+                        last_ts = dt
+                        last_entry = entry
+
+                    artist_set.add(artist)
+                    track_set.add(track)
+                    album_set.add(album)
+                    artist_tracks[artist].add(track)
+                    # ───────────────────────────────────────────────────────────
 
                     if artist:
                         if entry.get("ms_played") > MIN_MILLISECONDS:
@@ -205,6 +231,67 @@ def count_plays_from_directory(config):
                                 f"album-table-{yr}")
         sections += "</div>"
 
+        # ─── compute overall stats ───────────────────────────────────────────
+        today = date.today()
+        days_since_first = (today - first_ts.date()).days
+        days_played = len(dates_set)
+        pct_days = days_played / days_since_first * 100
+
+        first_str = first_ts.strftime("%b %d, %Y")
+        first_desc = f"{first_str} ({first_entry['master_metadata_album_artist_name']} - {first_entry['master_metadata_track_name']})"
+        last_str = last_ts.strftime("%b %d, %Y")
+        last_desc = f"{last_str} ({last_entry['master_metadata_album_artist_name']} - {last_entry['master_metadata_track_name']})"
+
+        artists_count = len(artist_set)
+        one_hits = sum(1 for a, ts in artist_tracks.items() if len(ts) == 1)
+        pct_one_hits = one_hits / artists_count * 100
+
+        # artists present in every year
+        year_artist_sets = [
+            set(ydata["artist_counts"].keys()) | set(ydata["artist_time"].keys())
+            for ydata in yearly.values()
+        ]
+        every_year_list = sorted(set.intersection(*year_artist_sets))
+        every_year_count = len(every_year_list)
+
+        albums_count = len(album_set)
+        albums_per_artist = albums_count / artists_count
+        tracks_count = len(track_set)
+
+        stats_html = f"""
+        <div id="stats">
+          <h2>Stats</h2>
+          <ul   >
+            <li>Days since first play: {days_since_first}</li>
+            <li>Days played: {days_played} ({pct_days:.2f}%)</li>
+            <li>First play: {first_desc}</li>
+            <li>Last play: {last_desc}</li>
+            <li>Artists: {artists_count}</li>
+            <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
+            <li>
+              Every-year artists: {every_year_count}
+              <button id="show-every-year-btn" class="stats-button">Show</button>
+            </li>
+            <li>Albums: {albums_count}</li>
+            <li>Albums per artist: {albums_per_artist:.1f}</li>
+            <li>Tracks: {tracks_count}</li>
+          </ul>
+        </div>
+
+        <!-- hidden modal -->
+        <div id="every-year-modal" class="modal-overlay" style="display:none;">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h2>Artists played every year ({every_year_count})</h2>
+                <span id="close-every-year-modal" class="close-button">&times;</span>
+            </div>
+            <ul style="list-style:none; padding:0; margin-top:1em; max-height:60vh; overflow:auto;">
+              {"".join(f"<li>{a}</li>" for a in every_year_list)}
+            </ul>
+          </div>
+        </div>
+        """
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -219,6 +306,7 @@ def count_plays_from_directory(config):
         
         <div id="year-tabs">{tabs}</div>
         {sections}
+        {stats_html}
         
         {print_file("html/settings_modal.html")}
     </body>
