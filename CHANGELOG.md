@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] 2025-04-30
+### Added
+- Added validation for configuration values 
+- Added data integrity checks 
+- Progress indicator was added to the GUI 
+- Added a comprehensive logging system with:
+  - Detailed error logs with file, line number, and function information
+  - Log file output with automatic rotation
+  - Command-line options for controlling log verbosity
+  - Exception logging with full traceback information
+
+### Changed
+- Improved memory efficiency by using generators for large data transformations:
+  - Modified data loading to process files one at a time
+  - Implemented entry-by-entry processing for better memory usage
+  - Reduced memory footprint for large datasets
+
 ## [1.11.2] 2025-04-30
 ### Changed
 - Renamed `Gui.py` to `gui.pi` to better fit the rest of the filenames.

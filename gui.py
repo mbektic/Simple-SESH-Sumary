@@ -4,7 +4,9 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 import importlib.util
+import logging
 from GenerateHTMLSummary import count_plays_from_directory, VERSION
+from logging_config import log_exception
 
 CONFIG_PATH = "config.py"
 
@@ -178,10 +180,66 @@ class ConfigApp:
         config.OUTPUT_FILE = self.output_file_var.get().strip()
         config.ITEMS_PER_PAGE = int(self.items_per_page_var.get())
 
-        # Run your main function
-        count_plays_from_directory(config)
+        # Create a progress window
+        progress_win = tk.Toplevel(self.root)
+        progress_win.title("Generating Summary")
+        progress_win.geometry("500x150")
+        progress_win.configure(bg="#1e1e1e")  # dark background
+        progress_win.transient(self.root)  # Set to be on top of the main window
+        progress_win.grab_set()  # Make it modal
 
-        # Show the result window
+        # Center the progress window
+        progress_win.update_idletasks()
+        width = progress_win.winfo_width()
+        height = progress_win.winfo_height()
+        x = (progress_win.winfo_screenwidth() // 2) - (width // 2)
+        y = (progress_win.winfo_screenheight() // 2) - (height // 2)
+        progress_win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+        # Status label
+        status_var = tk.StringVar(value="Starting...")
+        status_label = ttk.Label(progress_win, textvariable=status_var, justify="center", anchor="center")
+        status_label.pack(pady=(20, 10))
+
+        # Progress bar
+        progress_var = tk.DoubleVar(value=0.0)
+        progress_bar = ttk.Progressbar(progress_win, variable=progress_var, maximum=1.0, length=400, mode="determinate")
+        progress_bar.pack(pady=10, padx=20)
+
+        # Progress percentage label
+        percentage_var = tk.StringVar(value="0%")
+        percentage_label = ttk.Label(progress_win, textvariable=percentage_var, justify="center", anchor="center")
+        percentage_label.pack(pady=5)
+
+        # Progress callback function
+        def update_progress(step, progress):
+            status_var.set(step)
+            progress_var.set(progress)
+            percentage_var.set(f"{int(progress * 100)}%")
+            progress_win.update()  # Force update of the UI
+
+        # Run the main function with progress callback
+        # We need to use after() to allow the progress window to render first
+        def run_processing():
+            try:
+                count_plays_from_directory(config, update_progress)
+                # Close progress window and show result window
+                progress_win.destroy()
+                self.show_result_window()
+            except Exception as e:
+                # Log the exception with detailed traceback
+                logging.error(f"Error during processing: {e}")
+                log_exception()
+
+                # Show an error and close the progress window
+                progress_win.destroy()
+                tk.messagebox.showerror("Error", f"An error occurred during processing: {e}\n\nCheck the log file for details.")
+
+        # Schedule the processing to start after the window is shown
+        progress_win.after(100, run_processing)
+
+    def show_result_window(self):
+        """Show the result window after processing is complete."""
         result_win = tk.Toplevel(self.root)
         result_win.title("Report Generated")
         result_win.geometry("400x150")

@@ -18,9 +18,9 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
    - The file will have generated in the same folder as the script if you wish to revisit it later.
    - After opening the page, you can switch between playtime and play count as well as theme by clicking the settings button at the top right of the page.
      - ![Image](https://github.com/user-attachments/assets/8aadf1ed-289b-4e0b-95bd-a3e9b2928084)
- - If you wish to change the default settings, they are found in the `Config.py` file.
-   - You can also run the script like so `python.exe .\GenerateHTMLSummary.py True`
-   - It will skip the GUI and just generate the report with the values in `Config.py`
+ - If you wish to change the default settings, they are found in the `config.py` file.
+   - You can also run the script like so `python.exe .\GenerateHTMLSummary.py --skip-gui`
+   - It will skip the GUI and just generate the report with the values in `config.py`
 
 
 ## IMPORTANT NOTES

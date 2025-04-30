@@ -1,3 +1,4 @@
 .idea
 /sesh/*
 *.html
+*.log
