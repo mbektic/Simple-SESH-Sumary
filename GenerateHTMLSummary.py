@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.11.0"
+VERSION = "1.11.1"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 

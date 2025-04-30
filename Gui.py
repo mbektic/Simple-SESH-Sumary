@@ -106,12 +106,17 @@ class ConfigApp:
         """
         # Validate minimum milliseconds
         try:
-            min_ms = int(self.min_millis_var.get())
+            raw = self.min_millis_var.get()  # may raise TclError if blank
+            min_ms = int(raw)  # ValueError if non-numeric
             if min_ms < 0:
-                tk.messagebox.showerror("Invalid Input", "Minimum milliseconds must be a positive number. This value determines how long a track must be played to count as a listen.")
+                tk.messagebox.showerror("Invalid Input",
+                                        "Minimum milliseconds must be a positive number. This value determines how long a track must be played to count as a listen.")
                 return False
-        except ValueError:
-            tk.messagebox.showerror("Invalid Input", "Minimum milliseconds must be a number. Please enter a valid integer value (e.g., 20000 for 20 seconds).")
+        except (ValueError, tk.TclError):
+            tk.messagebox.showerror(
+                "Invalid Input",
+                "Minimum milliseconds must be a non-negative integer (e.g. 20000)."
+            )
             return False
 
         # Validate input directory
