@@ -1,11 +1,12 @@
 from datetime import datetime, date
 import json
 import sys
+import calendar
 from Gui import *
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.7.1"
+VERSION = "1.8.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 
@@ -71,6 +72,11 @@ def count_plays_from_directory(config):
     album_set = set()
     track_set = set()
     artist_tracks = defaultdict(set)
+    daily_counts   = Counter()
+    monthly_counts = Counter()
+    weekday_counts = Counter()
+    hour_counts = Counter()
+
 
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
@@ -114,6 +120,12 @@ def count_plays_from_directory(config):
                     if last_ts is None or dt > last_ts:
                         last_ts = dt
                         last_entry = entry
+
+                    if entry["ms_played"] > MIN_MILLISECONDS:
+                        daily_counts[dt.date()] += 1
+                        monthly_counts[(dt.year, dt.month)] += 1
+                        weekday_counts[dt.weekday()] += 1
+                        hour_counts[dt.hour]        += 1
 
                     artist_set.add(artist)
                     track_set.add(track)
@@ -258,27 +270,125 @@ def count_plays_from_directory(config):
         albums_per_artist = albums_count / artists_count
         tracks_count = len(track_set)
 
+        counts = sorted(daily_counts.values(), reverse=True)
+        edd = next((i for i, n in enumerate(counts, start=1) if n < i), len(counts))
+        next_need = max(0, (edd + 1) - sum(1 for c in counts if c >= edd + 1))
+
+        # ─── Artist cut-over point ────────────────────────────────
+        art_vals = sorted(all_data["artist_counts"].values(), reverse=True)
+        art_cut = next((i for i, n in enumerate(art_vals, start=1) if n < i), len(art_vals))
+
+        # ─── Most popular year & month ─────────────────────────────
+        year_plays = {y: sum(d["track_counts"].values()) for y, d in yearly.items()}
+        pop_year, pop_year_plays = max(year_plays.items(), key=lambda kv: kv[1])
+
+        (pm_y, pm_m), pop_mon_plays = max(monthly_counts.items(), key=lambda kv: kv[1])
+        pop_mon_str = f"{calendar.month_name[pm_m]} {pm_y}"
+
+        # — Longest Listening Streak (with date range) —
+        from datetime import timedelta
+
+        sorted_dates = sorted(dates_set)
+        # initialize
+        max_streak = curr_streak = 1
+        streak_start = streak_end = sorted_dates[0]
+        temp_start = sorted_dates[0]
+
+        for prev_day, next_day in zip(sorted_dates, sorted_dates[1:]):
+            if next_day == prev_day + timedelta(days=1):
+                curr_streak += 1
+            else:
+                curr_streak = 1
+                temp_start = next_day
+            # record a new max
+            if curr_streak > max_streak:
+                max_streak = curr_streak
+                streak_start = temp_start
+                streak_end = next_day
+
+        # — Average Plays per Active Day —
+        avg_plays = sum(daily_counts.values()) / len(dates_set)
+
+        # — Most Active Weekday —
+        wd_index, wd_count = weekday_counts.most_common(1)[0]
+        wd_name = calendar.day_name[wd_index]
+
+        # — Peak Listening Hour —
+        peak_hour, hour_count = hour_counts.most_common(1)[0]
+        hour12 = peak_hour % 12 or 12
+        suffix = "AM" if peak_hour < 12 else "PM"
+        peak_hour_str = f"{hour12}{suffix}"
+
+        # ─── rebuild stats_html ────────────────────────────────────
         stats_html = f"""
+        <h2>Stats</h2>
         <div id="stats">
-          <h2>Stats</h2>
-          <ul>
-            <li>Days since first play: {days_since_first}</li>
-            <li>Days played: {days_played} ({pct_days:.2f}%)</li>
-            <li>First play: {first_desc}</li>
-            <li>Last play: {last_desc}</li>
-            <li>Artists: {artists_count}</li>
-            <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
-            <li>
-              Every-year artists: {every_year_count}
-              <button id="show-every-year-btn" class="stats-button">Show</button>
-            </li>
-            <li>Albums: {albums_count}</li>
-            <li>Albums per artist: {albums_per_artist:.1f}</li>
-            <li>Tracks: {tracks_count}</li>
-          </ul>
+          <div class="stats-group">
+            <h3>General</h3>
+            <ul>
+              <li>Days since first play: {days_since_first}</li>
+              <li>Days played: {days_played} ({pct_days:.2f}%)</li>
+              <li>First play: {first_desc}</li>
+              <li>Last play: {last_desc}</li>
+            </ul>
+          </div>
+        
+          <div class="stats-group">
+            <h3>Your Library</h3>
+            <ul>
+              <li>Artists: {artists_count}</li>
+              <li>One hit wonders: {one_hits} ({pct_one_hits:.2f}%)</li>
+              <li>
+                Every-year artists: {every_year_count}
+                <button id="show-every-year-btn" class="stats-button">Show</button>
+              </li>
+              <li>Albums: {albums_count}</li>
+              <li>Albums per artist: {albums_per_artist:.1f}</li>
+              <li>Tracks: {tracks_count}</li>
+            </ul>
+          </div>
+        
+          <div class="stats-group">
+            <h3>Milestones</h3>
+            <ul>
+              <li>Eddington number: {edd}
+                 <button class="info-button"
+                         data-info="This means you have {edd} days with at least {edd} plays.">ℹ️</button>
+              </li>
+              <li>Days to next Eddington ({edd+1}): {next_need}</li>
+              <li>Artist cut-over point: {art_cut}
+                 <button class="info-button"
+                         data-info="This means you have {art_cut} artists with at least {art_cut} plays.">ℹ️</button>
+              </li>
+              <li>Most popular year: {pop_year} ({pop_year_plays} plays)</li>
+              <li>Most popular month: {pop_mon_str} ({pop_mon_plays} plays)</li>
+            </ul>
+          </div>
+        
+          <div class="stats-group">
+            <h3>Listening Patterns</h3>
+            <ul>
+              <li>Longest listening streak: {max_streak} days
+                  ({streak_start.strftime("%b %d, %Y")} – {streak_end.strftime("%b %d, %Y")})
+              </li>
+              <li>Average plays per active day: {avg_plays:.2f}</li>
+              <li>Most active weekday: {wd_name} ({wd_count} plays)</li>
+              <li>Peak listening hour: {peak_hour_str} ({hour_count} plays)</li>
+            </ul>
+          </div>
         </div>
 
-        <!-- hidden modal -->
+        <!-- Info modal -->
+        <div id="info-modal" class="modal-overlay" style="display:none;">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="info-modal-text"></h2>
+                <span id="close-info-modal" class="close-button">&times;</span>
+            </div>
+          </div>
+        </div>
+        
+         <!-- hidden modal -->
         <div id="every-year-modal" class="modal-overlay" style="display:none;">
           <div class="modal-content">
             <div class="modal-header">

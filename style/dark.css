@@ -13,7 +13,8 @@ table {
     background-color: #1e1e1e;
 }
 
-tr:hover {
+tr:hover,
+.stats-group {
     background-color: #2a2a2a;
 }
 

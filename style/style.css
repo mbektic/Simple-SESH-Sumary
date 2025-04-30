@@ -193,7 +193,7 @@ a, a:visited {
 * Stats Card
 *****************************/
 #stats {
-    max-width: 600px;
+    max-width: 75%;
     margin: 16px auto;
     padding: 1.5em;
     border-radius: 12px;
@@ -232,6 +232,53 @@ a, a:visited {
 
 .stats-button:hover {
     background-color: #17a34a;
+}
+
+.info-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-left: 0.3em;
+    padding: 0;
+    color: #1DB954;
+    transition: color 0.2s ease;
+}
+
+.info-button:hover {
+    color: #17a34a;
+}
+
+#stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+    gap: 1.5em;
+    padding: 1em;
+}
+
+.stats-group {
+    background: #fafafa;
+    padding: 1em;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.stats-group h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #1DB954;
+    padding-bottom: 0.3em;
+}
+
+.stats-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5em 0 0;
+}
+
+.stats-group li {
+    margin-bottom: 0.6em;
+    line-height: 1.4;
 }
 
 /****************************
@@ -315,7 +362,7 @@ a, a:visited {
     padding: 1rem;
     background-color: #1DB954;
     color: #fff;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #fff;
 }
 
 #title-bar h1 {
@@ -395,8 +442,8 @@ a, a:visited {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     max-width: 100vw;
     max-height: 100vh;
     display: flex;
@@ -560,10 +607,11 @@ a, a:visited {
     }
 
     #stats {
-        max-width: 90%;
+        max-width: 95%;
+        grid-template-columns: repeat(auto-fit, minmax(90%, 1fr));
     }
 
-    #stats h2 {
+    #stats h3 {
         font-size: 3em;
     }
 

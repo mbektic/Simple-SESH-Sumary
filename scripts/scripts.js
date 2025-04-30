@@ -238,13 +238,33 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('show-every-year-btn').addEventListener('click', () => {
         document.getElementById('every-year-modal').style.display = 'flex';
     });
-// close button
+
+    // close button
     document.getElementById('close-every-year-modal').addEventListener('click', () => {
         document.getElementById('every-year-modal').style.display = 'none';
     });
-// click outside to close
+
+    // click outside to close
     window.addEventListener('click', e => {
         if (e.target.id === 'every-year-modal') {
+            e.target.style.display = 'none';
+        }
+    });
+
+    // Info-button modal
+    document.querySelectorAll('.info-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('info-modal-text').textContent = btn.dataset.info;
+            document.getElementById('info-modal').style.display = 'flex';
+        });
+    });
+
+    // close the info modal
+    document.getElementById('close-info-modal').addEventListener('click', () => {
+        document.getElementById('info-modal').style.display = 'none';
+    });
+    window.addEventListener('click', e => {
+        if (e.target.id === 'info-modal') {
             e.target.style.display = 'none';
         }
     });
