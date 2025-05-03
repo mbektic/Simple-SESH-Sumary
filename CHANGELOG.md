@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.13.5] 2025-05-03
+## [1.14.0] 2025-05-03
 ### Added
 - Added a new "On This Day" section to the stats to see what songs you had on repeat in past years on the same date.
 
