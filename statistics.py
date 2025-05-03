@@ -129,11 +129,11 @@ def calculate_library_stats(
             one_hits = 0
             pct_one_hits = 0
 
-        # Calculate artists present in every year with error handling
+        # Only artists counted in artist_counts (i.e. at least one play > min_milliseconds) in *every* year
         if yearly:
             try:
                 year_artist_sets = [
-                    set(ydata["artist_counts"].keys()) | set(ydata["artist_time"].keys())
+                    set(ydata["artist_counts"].keys())
                     for ydata in yearly.values()
                 ]
                 if year_artist_sets:

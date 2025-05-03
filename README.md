@@ -9,10 +9,12 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 
 
 ## Running
- - Run the script using `python.exe .\GenerateHTMLSummary.py`  
+ - Double click `GenerateHTMLSummary.py` or run the script via terminal using `python.exe .\GenerateHTMLSummary.py`  
    - A gui like the one below will pop up. 
-   - ![Image](https://github.com/user-attachments/assets/9a3a6dba-8583-4624-af91-2e94e6166606)
- - After altering the settings to your liking, click "Generate Summary"
+   - ![Image](https://github.com/user-attachments/assets/d9fc9def-c394-4675-971e-159369657634)
+   - After altering the settings to your liking, click "Generate Summary"
+   - It will take a few seconds to generate the report, you can see the progress with the progress bar.
+   - ![Image](https://github.com/user-attachments/assets/2b06553c-8a3a-4cec-8f26-cab54e7c10ba)
    - You should get a confirmation screen like so, clicking "Open Report" _should_ open it in your web browser.
    - ![Image](https://github.com/user-attachments/assets/9804fe5d-7e23-4a8d-a02e-528ede041b65)
    - The file will have generated in the same folder as the script if you wish to revisit it later.

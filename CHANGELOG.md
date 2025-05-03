@@ -5,9 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.2] 2025-04-30
+### Added
+- There is now an "Items per page option" in the settings.
+- Added an on hover effect to the Activity Heatmap
+
+### Changed
+- Artist every year limits itself to the same `MIN_MILLISECONDS` value.
+- Made the Activity Heatmap squares larger on mobile. 
+
+### Removed
+- `ITEMS_PER_PAGE` config option was removed from the config and the GUI.
+
 ## [1.13.1] 2025-04-30
 ### Fixed
-- Fixed missing information text for "number of sessions" stat
+- Fixed missing information text for the "number of sessions" stat
 
 ### Removed
 - Removed some useless logging. 

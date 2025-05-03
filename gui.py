@@ -42,7 +42,6 @@ class ConfigApp:
         self.min_millis_var = tk.IntVar(value=config.MIN_MILLISECONDS)
         self.input_dir_var = tk.StringVar(value=config.INPUT_DIR)
         self.output_file_var = tk.StringVar(value=config.OUTPUT_FILE)
-        self.items_per_page_var = tk.IntVar(value=config.ITEMS_PER_PAGE)
 
         self.build_ui()
 
@@ -84,17 +83,6 @@ class ConfigApp:
         ).pack(anchor="w", padx=10, pady=(5, 0))
 
         ttk.Entry(output_frame, textvariable=self.output_file_var, width=40, font=("Helvetica", 14)).pack(anchor="w", padx=10, pady=5)
-
-        # Items per Page
-        page_frame = ttk.LabelFrame(self.root, text="Items Per Page")
-        page_frame.grid(row=4, column=0, sticky="ew", **padding)
-
-        ttk.Label(
-            page_frame,
-            text="How many items to show per table page in the output HTML."
-        ).pack(anchor="w", padx=10, pady=(5, 0))
-
-        ttk.Entry(page_frame, textvariable=self.items_per_page_var, width=10, font=("Helvetica", 14)).pack(anchor="w", padx=10, pady=5)
 
         # Run Button
         ttk.Button(self.root, text="Generate Summary", command=self.run).grid(row=5, column=0, pady=15)
@@ -157,16 +145,6 @@ class ConfigApp:
             tk.messagebox.showerror("Error", f"Invalid output file path: {e}")
             return False
 
-        # Validate items per page
-        try:
-            items_per_page = int(self.items_per_page_var.get())
-            if items_per_page <= 0:
-                tk.messagebox.showerror("Invalid Input", "Items per page must be a positive number. This controls how many items are displayed per page in the generated HTML report.")
-                return False
-        except ValueError:
-            tk.messagebox.showerror("Invalid Input", "Items per page must be a number. Please enter a valid integer value (e.g., 10).")
-            return False
-
         return True
 
     def run(self):
@@ -178,7 +156,6 @@ class ConfigApp:
         config.MIN_MILLISECONDS = int(self.min_millis_var.get())
         config.INPUT_DIR = self.input_dir_var.get().strip()
         config.OUTPUT_FILE = self.output_file_var.get().strip()
-        config.ITEMS_PER_PAGE = int(self.items_per_page_var.get())
 
         # Create a progress window
         progress_win = tk.Toplevel(self.root)

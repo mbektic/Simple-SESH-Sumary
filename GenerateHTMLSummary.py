@@ -17,7 +17,7 @@ from statistics import calculate_all_stats
 from logging_config import configure_logging, log_exception, log_system_info
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.13.1"
+VERSION = "1.13.2"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 # Parse command line arguments
@@ -50,7 +50,6 @@ def count_plays_from_directory(config: Any, progress_callback=None) -> None:
             - MIN_MILLISECONDS: Minimum milliseconds for a play to count
             - INPUT_DIR: Directory containing JSON files
             - OUTPUT_FILE: Base name for the output HTML file
-            - ITEMS_PER_PAGE: Number of items per page in the HTML tables
         progress_callback: Optional callback function to report progress.
             The callback should accept two parameters:
             - step (str): The current processing step
@@ -66,7 +65,6 @@ def count_plays_from_directory(config: Any, progress_callback=None) -> None:
     MIN_MILLISECONDS = config.MIN_MILLISECONDS
     input_dir = config.INPUT_DIR
     output_html = config.OUTPUT_FILE + ".html"
-    ITEMS_PER_PAGE = config.ITEMS_PER_PAGE
 
     # Define a helper function to update progress
     def update_progress(step, progress):
@@ -146,7 +144,7 @@ def count_plays_from_directory(config: Any, progress_callback=None) -> None:
         update_progress("Generating HTML", 0.8)
         try:
             html_content = generate_html_content(
-                tabs, sections, stats_html, ITEMS_PER_PAGE, GITHUB_URL, VERSION
+                tabs, sections, stats_html, GITHUB_URL, VERSION
             )
         except Exception as e:
             logging.error(f"Error generating HTML content: {e}")

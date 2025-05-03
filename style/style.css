@@ -422,6 +422,10 @@ a, a:visited {
     }
 }
 
+#ItemPerPageHolder {
+    margin-top: 16px;
+}
+
 /****************************
 * FULLSCREEN LOADING OVERLAY
 *****************************/
@@ -502,6 +506,10 @@ a, a:visited {
     margin: 1px;
     background-color: #ebedf0;
     border-radius: 2px;
+}
+
+.heatmap-cell:hover {
+  background: red !important;
 }
 
 .heatmap-cell.level-1 {
@@ -627,8 +635,15 @@ a, a:visited {
         gap: 1.25rem;
     }
 
-    .label-text {
+    .label-text,
+    #items-per-page-input,
+    #apply-settings {
         font-size: xx-large;
+    }
+
+    .heatmap-cell {
+        width: 1em;
+        height: 1em;
     }
 
     .modal-content {

@@ -3,6 +3,7 @@ const currentTheme = localStorage.getItem("theme") || "dark";
 themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
 const originalRowCache = {};
 const searchTerms = {};
+let itemsPerPage = parseInt(localStorage.getItem("itemsPerPage"), 10) || 10;
 
 window.onload = () => {
     const overlay = document.getElementById('loading-overlay');
@@ -10,9 +11,9 @@ window.onload = () => {
     requestAnimationFrame(() => {
         document.querySelectorAll('.year-section').forEach(sec => {
             const yr = sec.id.split('-')[1];
-            paginateTable(`artist-table-${yr}`, ITEMS_PER_PAGE);
-            paginateTable(`track-table-${yr}`, ITEMS_PER_PAGE);
-            paginateTable(`album-table-${yr}`, ITEMS_PER_PAGE);
+            paginateTable(`artist-table-${yr}`, itemsPerPage);
+            paginateTable(`track-table-${yr}`, itemsPerPage);
+            paginateTable(`album-table-${yr}`, itemsPerPage);
         });
 
         // Trigger the fade-out
@@ -197,7 +198,7 @@ function switchMode(tableId, mode) {
         playtimeDiv.style.display = 'block';
     }
 
-    paginateTable(tableId, ITEMS_PER_PAGE);
+    paginateTable(tableId, itemsPerPage);
 }
 
 // Focus trap utility function
@@ -218,7 +219,7 @@ function setupFocusTrap(modalElement) {
             if (e.shiftKey && document.activeElement === firstElement) {
                 e.preventDefault();
                 lastElement.focus();
-            } 
+            }
             // Tab
             else if (!e.shiftKey && document.activeElement === lastElement) {
                 e.preventDefault();
@@ -283,6 +284,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Return focus to the button that opened the modal
                 document.getElementById('show-every-year-btn').focus();
             }
+        }
+    });
+
+    // — Initialize the input with saved or default value —
+    const ippInput = document.getElementById("items-per-page-input");
+    ippInput.value = itemsPerPage;
+
+    document.getElementById("apply-settings").addEventListener("click", () => {
+        const v = parseInt(ippInput.value, 10);
+        if (!isNaN(v) && v > 0) {
+            itemsPerPage = v;
+            localStorage.setItem("itemsPerPage", v);
+            // re‑paginate every table with the new page size
+            document.querySelectorAll('.year-section').forEach(sec => {
+                const yr = sec.id.split('-')[1];
+                ['artist-table', 'track-table', 'album-table'].forEach(base =>
+                    paginateTable(`${base}-${yr}`, itemsPerPage)
+                );
+            });
+            // close the modal
+            document.getElementById("settings-modal").style.display = "none";
+        } else {
+            alert("Please enter a positive integer for Items per page.");
         }
     });
 

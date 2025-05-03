@@ -2,3 +2,4 @@
 /sesh/*
 *.html
 *.log
+*.log.*

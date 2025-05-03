@@ -16,10 +16,6 @@ INPUT_DIR = "sesh"
 OUTPUT_FILE = "summary"
 
 
-# The number of items per table page.
-ITEMS_PER_PAGE = 10
-
-
 def validate_config():
     """
     Validate configuration values and ensure they are within acceptable ranges.
@@ -28,7 +24,7 @@ def validate_config():
     Returns:
         bool: True if validation succeeded, False if critical errors were found
     """
-    global MIN_MILLISECONDS, INPUT_DIR, OUTPUT_FILE, ITEMS_PER_PAGE
+    global MIN_MILLISECONDS, INPUT_DIR, OUTPUT_FILE
 
     # Validate MIN_MILLISECONDS
     if not isinstance(MIN_MILLISECONDS, int) or MIN_MILLISECONDS < 0:
@@ -64,10 +60,5 @@ def validate_config():
         except Exception as e:
             logging.error(f"Failed to create output directory: {e}")
             return False
-
-    # Validate ITEMS_PER_PAGE
-    if not isinstance(ITEMS_PER_PAGE, int) or ITEMS_PER_PAGE <= 0:
-        logging.warning(f"Invalid ITEMS_PER_PAGE value: {ITEMS_PER_PAGE}. Setting to default (10).")
-        ITEMS_PER_PAGE = 10
 
     return True

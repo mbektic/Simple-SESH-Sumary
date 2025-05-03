@@ -100,18 +100,14 @@ def print_styles() -> str:
         logging.error(f"Error loading CSS files: {e}")
         raise
 
-def generate_js(items_per_page: int) -> str:
+def generate_js() -> str:
     """
     Generate JavaScript for the HTML page.
-
-    Args:
-        items_per_page (int): Number of items per page in the HTML tables
 
     Returns:
         str: JavaScript code as a string
     """
     return f"""<script>
-    const ITEMS_PER_PAGE = {items_per_page}
     {print_file("scripts/scripts.js")}
     </script>"""
 
@@ -396,7 +392,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -
       </script>
     """
 
-def generate_html_content(tabs: str, sections: str, stats_html: str, items_per_page: int, github_url: str, version: str) -> str:
+def generate_html_content(tabs: str, sections: str, stats_html: str, github_url: str, version: str) -> str:
     """
     Generate the complete HTML content for the summary report.
 
@@ -404,7 +400,6 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, items_per_p
         tabs (str): HTML for year tabs
         sections (str): HTML for year sections
         stats_html (str): HTML for statistics
-        items_per_page (int): Number of items per page in the HTML tables
         github_url (str): URL to the GitHub repository
         version (str): Version of the application
 
@@ -418,7 +413,7 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, items_per_p
         <meta charset="UTF-8">
         <title>Spotify Summary</title>
         {print_styles()}
-        {generate_js(items_per_page)}
+        {generate_js()}
     </head>
     <body style='overflow: hidden;'>
         {print_file("html/title_bar.html")}
