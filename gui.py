@@ -77,8 +77,7 @@ class ConfigApp:
 
         ttk.Label(
             input_frame,
-            text="Folder where your Spotify JSON files are located.\n"
-                 "Easiest method is to put them in the default 'sesh' folder."
+            text="Folder where you extracted your Spotify JSON files are located."
         ).pack(anchor="w", padx=10, pady=(5, 0))
 
         # Create a frame to hold the entry field and browse button side by side
@@ -98,7 +97,7 @@ class ConfigApp:
         ttk.Label(
             output_frame,
             text="Name of the output HTML file.\n"
-                 "If unchanged, it will be created in the current folder."
+                 "If unchanged, it will be created in the same folder as the 'GenerateHTMLSummary.py' script."
         ).pack(anchor="w", padx=10, pady=(5, 0))
 
         ttk.Entry(output_frame, textvariable=self.output_file_var, width=40, font=("Helvetica", 14)).pack(anchor="w", padx=10, pady=5)
