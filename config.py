@@ -36,7 +36,7 @@ def validate_config():
         logging.error("INPUT_DIR cannot be empty and must be a string.")
         return False
 
-    # Create input directory if it doesn't exist
+    # Create the input directory if it doesn't exist
     try:
         if not os.path.exists(INPUT_DIR):
             logging.info(f"Creating input directory: {INPUT_DIR}")

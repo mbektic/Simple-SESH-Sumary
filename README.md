@@ -11,7 +11,9 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ## Running
  - Double click `GenerateHTMLSummary.py` or run the script via terminal using `python.exe .\GenerateHTMLSummary.py`  
    - A gui like the one below will pop up. 
-   - ![Image](https://github.com/user-attachments/assets/d9fc9def-c394-4675-971e-159369657634)
+   - ![Image](https://github.com/user-attachments/assets/348cf88d-c87a-47ac-be10-cd6e85f647db)
+   - Click browse and select the folder that contains your extracted JSON files. 
+     - Alternatively you can place your JSON files in the default `sesh` folder and not alter the settings. 
    - After altering the settings to your liking, click "Generate Summary"
    - It will take a few seconds to generate the report, you can see the progress with the progress bar.
    - ![Image](https://github.com/user-attachments/assets/2b06553c-8a3a-4cec-8f26-cab54e7c10ba)
@@ -19,7 +21,7 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
    - ![Image](https://github.com/user-attachments/assets/9804fe5d-7e23-4a8d-a02e-528ede041b65)
    - The file will have generated in the same folder as the script if you wish to revisit it later.
    - After opening the page, you can switch between playtime and play count as well as theme by clicking the settings button at the top right of the page.
-     - ![Image](https://github.com/user-attachments/assets/8aadf1ed-289b-4e0b-95bd-a3e9b2928084)
+     - ![Image](https://github.com/user-attachments/assets/569ae55d-8d09-4141-bbbb-4539b9c6b3dc)
  - If you wish to change the default settings, they are found in the `config.py` file.
    - You can also run the script like so `python.exe .\GenerateHTMLSummary.py --skip-gui`
    - It will skip the GUI and just generate the report with the values in `config.py`

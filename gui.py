@@ -2,7 +2,7 @@
 import os
 import webbrowser
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import importlib.util
 import logging
 from GenerateHTMLSummary import count_plays_from_directory, VERSION
@@ -45,6 +45,17 @@ class ConfigApp:
 
         self.build_ui()
 
+    def browse_directory(self):
+        """
+        Open a directory selection dialog and update the input directory field.
+        """
+        directory = filedialog.askdirectory(
+            initialdir=self.input_dir_var.get() if os.path.exists(self.input_dir_var.get()) else os.getcwd(),
+            title="Select Input Directory"
+        )
+        if directory:  # If a directory was selected (not cancelled)
+            self.input_dir_var.set(directory)
+
     def build_ui(self):
         padding = {'padx': 10, 'pady': 5}
 
@@ -70,7 +81,15 @@ class ConfigApp:
                  "Easiest method is to put them in the default 'sesh' folder."
         ).pack(anchor="w", padx=10, pady=(5, 0))
 
-        ttk.Entry(input_frame, textvariable=self.input_dir_var, width=40, font=("Helvetica", 14)).pack(anchor="w", padx=10, pady=5)
+        # Create a frame to hold the entry field and browse button side by side
+        dir_frame = ttk.Frame(input_frame)
+        dir_frame.pack(anchor="w", padx=10, pady=5, fill="x")
+
+        # Add the entry field
+        ttk.Entry(dir_frame, textvariable=self.input_dir_var, width=30, font=("Helvetica", 14)).pack(side="left", fill="x", expand=True)
+
+        # Add the browse button
+        ttk.Button(dir_frame, text="Browse...", command=self.browse_directory).pack(side="right", padx=(5, 0))
 
         # Output File
         output_frame = ttk.LabelFrame(self.root, text="Output File")
