@@ -8,7 +8,7 @@ MIN_MILLISECONDS = 20000
 
 # Directory, or folder, on your computer where your Spotify JSON files are located.
 #     The easiest method is to just put them in the sesh folder.
-INPUT_DIR = "sesh"
+INPUT_DIR = ""
 
 
 # Name/path of the output file. If you don't change this, it will be in the same folder

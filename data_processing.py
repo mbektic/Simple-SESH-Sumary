@@ -365,27 +365,12 @@ def process_entry(
         play_counted, skip_count, offline_count, track_skip_counts
     )
 
-def process_spotify_data(entries: List[Dict[str, Any]], min_milliseconds: int) -> Tuple[
-    DefaultDict[int, Dict[str, DefaultDict[str, int]]],
-    Set[datetime.date],
-    datetime,
-    Dict[str, Any],
-    datetime,
-    Dict[str, Any],
-    Set[str],
-    Set[str],
-    Set[str],
-    DefaultDict[str, Set[str]],
-    Counter,
-    Counter,
-    Counter,
-    Counter,
-    List[datetime],
-    int,
-    int,
-    int,
-    Counter
-]:
+def process_spotify_data(entries: List[Dict[str, Any]], min_milliseconds: int) -> tuple[
+    defaultdict[Any, dict[str, defaultdict[Any, int]]] | defaultdict[int, dict[str, defaultdict[str, int]]], set[
+        Any], datetime | None, dict[str, Any] | None, datetime | None, dict[str, Any] | None, set[Any] | set[str], set[
+        Any] | set[str], set[Any] | set[str], defaultdict[Any, set] | defaultdict[str, set[str]], Counter[
+        Any] | Counter, Counter[Any] | Counter, Counter[Any] | Counter, Counter[Any] | Counter, list[Any] | list[
+        datetime], int, int, int, Counter[Any] | Counter, str]:
     """
     Process Spotify streaming history entries and extract statistics.
     Uses a generator-based approach for memory efficiency.
@@ -458,11 +443,33 @@ def process_spotify_data(entries: List[Dict[str, Any]], min_milliseconds: int) -
             play_counted, skip_count, offline_count, track_skip_counts
         )
 
+    date_to_tracks = defaultdict(Counter)
+    for entry in entries:
+        if entry.get("ms_played", 0) > min_milliseconds:
+            dt = datetime.fromisoformat(entry["ts"].replace("Z", "+00:00")).date()
+            mmdd = dt.strftime("%m-%d")
+            full_date = dt.isoformat()
+            track_name = entry.get("master_metadata_track_name", "Unknown Track")
+            artist = entry.get("master_metadata_album_artist_name", "Unknown Artist")
+            track = f"{track_name} — {artist}"
+            date_to_tracks[mmdd][(track, full_date)] += 1
+
+    # Convert to JSON-ready format, excluding any entries with only 1 play
+    otd = {}
+    for mmdd, ctr in date_to_tracks.items():
+        otd[mmdd] = [
+            {"track": track, "date": date, "count": count}
+            for (track, date), count in ctr.items()
+            if count > 2
+        ]
+
+    otd_json = json.dumps(otd, indent=2)
+
     return (
         yearly, dates_set, first_ts, first_entry, last_ts, last_entry,
         artist_set, album_set, track_set, artist_tracks, daily_counts,
         monthly_counts, weekday_counts, hour_counts, play_times,
-        play_counted, skip_count, offline_count, track_skip_counts
+        play_counted, skip_count, offline_count, track_skip_counts, otd_json
     )
 
 def process_entry_for_deduplication(entry: Dict[str, Any], unique_entries: Dict[str, Dict[str, Any]]) -> Tuple[Dict[str, Dict[str, Any]], bool]:

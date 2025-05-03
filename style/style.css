@@ -193,7 +193,8 @@ a, a:visited {
 * Stats Card
 *****************************/
 #stats,
-#heatmap-holder {
+#heatmap-holder,
+#otd-holder {
     max-width: 75%;
     margin: 16px auto;
     padding: 1.5em;
@@ -509,7 +510,7 @@ a, a:visited {
 }
 
 .heatmap-cell:hover {
-  background: red !important;
+    background: red !important;
 }
 
 .heatmap-cell.level-1 {
@@ -532,6 +533,17 @@ a, a:visited {
     background-color: #0f4413;
 }
 
+.otd-pagination {
+    margin-top: 0.5em;
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    align-items: center;
+}
+
+#stats ol {
+    margin: 2em;
+}
 
 /****************************
 * MOBILE STYLE
@@ -665,23 +677,32 @@ a, a:visited {
         grid-template-columns: repeat(auto-fit, minmax(90%, 1fr));
     }
 
-    #heatmap-holder {
+    #heatmap-holder,
+    #otd-holder {
         max-width: 93%;
     }
 
     #stats h3,
-    #heatmap-holder h3 {
+    #heatmap-holder h3,
+    #otd-holder h3 {
         font-size: 3em;
     }
 
     #every-year-modal li,
     #stats li,
-    #heatmap-holder span {
+    #heatmap-holder span,
+    #otd-holder span {
         font-size: 2em;
     }
 
-    #stats button {
+    #stats button,
+    #otd-date {
         font-size: 1em;
+    }
+
+    #otd-pagination button,
+    #otd-pagination span {
+        font-size: 2em;
     }
 
 }

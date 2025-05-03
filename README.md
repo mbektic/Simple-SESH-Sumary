@@ -11,7 +11,7 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ## Running
  - Double click `GenerateHTMLSummary.py` or run the script via terminal using `python.exe .\GenerateHTMLSummary.py`  
    - A gui like the one below will pop up. 
-   - ![Image](https://github.com/user-attachments/assets/348cf88d-c87a-47ac-be10-cd6e85f647db)
+   - ![Image](https://github.com/user-attachments/assets/0a23c2f8-5a51-46e6-a2c9-770fc4f90093)
    - Click browse and select the folder that contains your extracted JSON files.
    - After altering the settings to your liking, click "Generate Summary"
    - It will take a few seconds to generate the report, you can see the progress with the progress bar.
@@ -24,7 +24,7 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
  - If you wish to change the default settings, they are found in the `config.py` file.
    - You can also run the script like so `python.exe .\GenerateHTMLSummary.py --skip-gui`
    - It will skip the GUI and just generate the report with the values in `config.py`
-     - The default directory is `sesh` in the same folder as the `GenerateHTMLSummary.py` file.
+     - You will need to set the default directory in the `config.py`.
 
 
 ## IMPORTANT NOTES
@@ -47,6 +47,6 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ![Image](https://github.com/user-attachments/assets/1a9ba192-1fc5-4cc6-b115-a5f57ebef6db)
 
 ### Stats
-![Image](https://github.com/user-attachments/assets/0798f9eb-6d7c-4141-843f-c965f1b86c2c)
+![Image](https://github.com/user-attachments/assets/d58bf131-180e-4bab-ab78-2ad2246ed5ca)
 ![Image](https://github.com/user-attachments/assets/bfa47186-ae50-4c73-a2b4-77e7fdf0b0db)
 ![Image](https://github.com/user-attachments/assets/29c716bd-3300-4ade-afdf-1f97cb6d92fd)

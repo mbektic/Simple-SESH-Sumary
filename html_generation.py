@@ -228,7 +228,7 @@ def build_year_sections(years: List[int], yearly: DefaultDict[int, Dict[str, Def
         sections += "</div>"
     return sections
 
-def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -> str:
+def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], otd_data) -> str:
     """
     Build HTML for the statistics section.
 
@@ -345,6 +345,16 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -
           <li>Offline vs Online ratio: {stats_data['ratio_str']} ({stats_data['offline_ratio_pct']:.2f}% offline)</li>
         </ul>
       </div>
+      
+    <div id="" class="stats-group">
+        <h3>On This Day <input type="date" id="otd-date" /></h3>
+        <div id="otd-results"></div>
+        <div id="otd-pagination" class="otd-pagination">
+          <button id="otd-prev" class="stats-button">Prev</button>
+          <span id="otd-page-label"></span>
+          <button id="otd-next" class="stats-button">Next</button>
+        </div>
+      </div>
     </div>
 
     <!-- Info modal -->
@@ -383,12 +393,16 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int]) -
           <span>More</span>
         </div>
       </div>
+      
+
     
       <script>
         const startDate = new Date("{first_date}");
         const endDate   = new Date("{last_date}");
         const counts = JSON.parse(`{daily_counts_json}`);
+        const onThisDayData = {otd_data};
         {print_file("scripts/heatmap.js")}
+        {print_file("scripts/otd.js")}
       </script>
     """
 
