@@ -173,21 +173,6 @@ a, a:visited {
     padding-top: 1em;
 }
 
-#year-tabs {
-    background-color: #1DB954;
-}
-
-.year-tab {
-    color: #ffffff;
-}
-
-.year-tab.active {
-    border-color: #ffffff;
-}
-
-.year-tab:hover {
-    color: rgba(255, 255, 255, 0.8);
-}
 
 /****************************
 * Stats Card

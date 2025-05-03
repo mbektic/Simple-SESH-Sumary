@@ -1,11 +1,7 @@
 #loading-overlay,
-body {
-    background: #f4f4f9;
-    color: #333;
-}
-
 body,
 .pagination button {
+    background: #f4f4f9;
     color: #333;
 }
 

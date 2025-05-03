@@ -201,7 +201,7 @@ function switchMode(tableId, mode) {
     paginateTable(tableId, itemsPerPage);
 }
 
-// Focus trap utility function
+// Modal utility functions
 function setupFocusTrap(modalElement) {
     const focusableElements = modalElement.querySelectorAll(
         'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
@@ -229,61 +229,67 @@ function setupFocusTrap(modalElement) {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const settingsBtn = document.getElementById("settings-button");
-    const modal = document.getElementById("settings-modal");
-    const closeBtn = document.getElementById("close-settings");
+function openModal(modal, opener) {
+    modal.style.display = "flex";
+    modal.dataset.opener = opener.id || '';
 
-    // Set up focus traps for all modals
+    // Focus the first focusable element
+    const firstFocusable = modal.querySelector('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) {
+        setTimeout(() => firstFocusable.focus(), 50);
+    }
+}
+
+function closeModal(modal) {
+    if (modal.style.display !== "flex") return;
+
+    modal.style.display = "none";
+
+    // Return focus to the opener element
+    const openerId = modal.dataset.opener;
+    if (openerId) {
+        const opener = document.getElementById(openerId);
+        if (opener) opener.focus();
+    }
+}
+
+function setupModal(modalId, openerId, closeButtonId) {
+    const modal = document.getElementById(modalId);
+    const opener = document.getElementById(openerId);
+    const closeButton = document.getElementById(closeButtonId);
+
     setupFocusTrap(modal);
-    setupFocusTrap(document.getElementById('info-modal'));
-    setupFocusTrap(document.getElementById('every-year-modal'));
 
-    // Open modal
-    settingsBtn.addEventListener("click", () => {
-        modal.style.display = "flex";
-        // Focus the first focusable element
-        const firstFocusable = modal.querySelector('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) {
-            setTimeout(() => firstFocusable.focus(), 50);
-        }
-    });
+    if (opener) {
+        opener.addEventListener("click", () => openModal(modal, opener));
+    }
 
-    // Close modal when the close button is clicked
-    closeBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-        // Return focus to the button that opened the modal
-        settingsBtn.focus();
-    });
+    if (closeButton) {
+        closeButton.addEventListener("click", () => closeModal(modal));
+    }
 
-    // Close modal if clicked outside of modal content
-    window.addEventListener("click", (e) => {
+    // Close modal if clicked outside
+    modal.addEventListener("click", (e) => {
         if (e.target === modal) {
-            modal.style.display = "none";
-            // Return focus to the button that opened the modal
-            settingsBtn.focus();
+            closeModal(modal);
         }
     });
+
+    return {modal, opener, closeButton};
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Set up all modals
+    const {modal: settingsModal} = setupModal("settings-modal", "settings-button", "close-settings");
+    const {modal: infoModal} = setupModal("info-modal", null, "close-info-modal");
+    const {modal: everyYearModal} = setupModal("every-year-modal", "show-every-year-btn", "close-every-year-modal");
 
     // Close modals with Escape key
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            // Close any open modal and return focus
-            if (modal.style.display === "flex") {
-                modal.style.display = "none";
-                settingsBtn.focus();
-            }
-            if (document.getElementById('info-modal').style.display === "flex") {
-                document.getElementById('info-modal').style.display = "none";
-                // Return focus to the button that opened the modal
-                const infoButtons = document.querySelectorAll('.info-button');
-                if (infoButtons.length > 0) infoButtons[0].focus();
-            }
-            if (document.getElementById('every-year-modal').style.display === "flex") {
-                document.getElementById('every-year-modal').style.display = "none";
-                // Return focus to the button that opened the modal
-                document.getElementById('show-every-year-btn').focus();
-            }
+            closeModal(settingsModal);
+            closeModal(infoModal);
+            closeModal(everyYearModal);
         }
     });
 
@@ -401,70 +407,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const everyYearBtn = document.getElementById('show-every-year-btn');
-    const everyYearModal = document.getElementById('every-year-modal');
-    const closeEveryYearBtn = document.getElementById('close-every-year-modal');
-    const infoModal = document.getElementById('info-modal');
-    const closeInfoBtn = document.getElementById('close-info-modal');
-
-    everyYearBtn.addEventListener('click', () => {
-        everyYearModal.style.display = 'flex';
-        // Focus the first focusable element
-        const firstFocusable = everyYearModal.querySelector('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) {
-            setTimeout(() => firstFocusable.focus(), 50);
-        }
-    });
-
-    // close button for every-year-modal
-    closeEveryYearBtn.addEventListener('click', () => {
-        everyYearModal.style.display = 'none';
-        // Return focus to the button that opened the modal
-        everyYearBtn.focus();
-    });
-
-    // Info-button modal
+    // Info-button modal setup
     document.querySelectorAll('.info-button').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById('info-modal-text').textContent = btn.dataset.info;
-            infoModal.style.display = 'flex';
-            // Store the button that opened the modal
-            infoModal.dataset.opener = btn.id || '';
-            // Focus the first focusable element
-            const firstFocusable = infoModal.querySelector('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) {
-                setTimeout(() => firstFocusable.focus(), 50);
-            }
+            openModal(infoModal, btn);
         });
     });
 
-    // Close modals when clicking outside
-    ['click', 'touchstart'].forEach(evt => {
-        window.addEventListener(evt, e => {
-            if (e.target.id === 'every-year-modal') {
-                e.target.style.display = 'none';
-                // Return focus to the button that opened the modal
-                everyYearBtn.focus();
-            } else if (e.target.id === 'info-modal') {
-                e.target.style.display = 'none';
-                // Return focus to the button that opened the modal
-                const openerId = infoModal.dataset.opener;
-                if (openerId) {
-                    const opener = document.getElementById(openerId);
-                    if (opener) opener.focus();
-                }
-            }
-        });
-    });
-
-    // close the info modal
-    closeInfoBtn.addEventListener('click', () => {
-        infoModal.style.display = 'none';
-        // Return focus to the button that opened the modal
-        const openerId = infoModal.dataset.opener;
-        if (openerId) {
-            const opener = document.getElementById(openerId);
-            if (opener) opener.focus();
+    // Add touch event support for modal closing
+    window.addEventListener('touchstart', e => {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeModal(e.target);
         }
     });
 });
