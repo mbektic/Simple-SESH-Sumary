@@ -5,7 +5,6 @@
     // helper to compute ISO week number
     function getISOWeek(d) {
         const date = new Date(d.getTime());
-        // Thursday-based week number
         date.setHours(0, 0, 0, 0);
         date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
         const firstThursday = new Date(date.getFullYear(), 0, 4);
@@ -20,10 +19,29 @@
         cell.className = 'heatmap-cell level-' + level;
 
         const weekNum = getISOWeek(d);
-        cell.title = `${dateStr} (Week ${weekNum}): ${cnt} plays`;
-        cell.addEventListener('click', () =>
-            alert(`Date: ${dateStr}\nWeek: ${weekNum}\nPlays: ${cnt}`)
-        );
+
+        // Create a more detailed tooltip content
+        const tooltipContent = `
+            <div class="heatmap-tooltip">
+                <div class="tooltip-date">${new Date(dateStr).toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })}</div>
+                <div class="tooltip-plays">${cnt} plays</div>
+                <div class="tooltip-week">Week ${weekNum}</div>
+            </div>
+        `;
+
+        // Initialize tooltip
+        tippy(cell, {
+            content: tooltipContent,
+            allowHTML: true,
+            placement: 'top',
+            arrow: true,
+            theme: 'spotify'
+        });
 
         container.appendChild(cell);
     }

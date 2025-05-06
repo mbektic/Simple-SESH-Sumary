@@ -50,3 +50,7 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ![Image](https://github.com/user-attachments/assets/d58bf131-180e-4bab-ab78-2ad2246ed5ca)
 ![Image](https://github.com/user-attachments/assets/bfa47186-ae50-4c73-a2b4-77e7fdf0b0db)
 ![Image](https://github.com/user-attachments/assets/29c716bd-3300-4ade-afdf-1f97cb6d92fd)
+
+## Thanks
+ - [Tippy.js](https://atomiks.github.io/tippyjs/)
+ - [Popper.js](https://popper.js.org/docs/)

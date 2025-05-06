@@ -518,6 +518,36 @@ a, a:visited {
     background-color: #0f4413;
 }
 
+/* Tooltip styles */
+.tippy-box[data-theme~='spotify'] {
+    background-color: #1DB954;
+    color: white;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.tippy-box[data-theme~='spotify'] .tippy-arrow {
+    color: #1DB954;
+}
+
+.heatmap-tooltip {
+    padding: 5px;
+}
+
+.tooltip-date {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.tooltip-plays {
+    font-size: 1.1em;
+}
+
+.tooltip-week {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
 .otd-pagination {
     margin-top: 0.5em;
     display: flex;
@@ -690,4 +720,15 @@ a, a:visited {
         font-size: 2em;
     }
 
+    .tooltip-date {
+        font-size: 2em;
+    }
+
+    .tooltip-plays {
+        font-size: 3em;
+    }
+
+    .tooltip-week {
+        font-size: 2.7em;
+    }
 }

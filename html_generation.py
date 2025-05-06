@@ -395,7 +395,8 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
       </div>
       
 
-    
+      <script>{print_file("scripts/popper.min.js")}</script>'
+      <script>{print_file("scripts/tippy-bundle.umd.min.js")}</script>
       <script>
         const startDate = new Date("{first_date}");
         const endDate   = new Date("{last_date}");
