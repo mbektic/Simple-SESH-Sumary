@@ -560,6 +560,65 @@ a, a:visited {
     margin: 2em;
 }
 
+#personality-type {
+    max-width: 75%;
+    margin: 16px auto;
+    text-align: center;
+}
+
+#personality-type p {
+    font-size: 1.2em;
+}
+
+.personality-chart {
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.personality-bar-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+
+}
+
+.personality-type-label {
+    width: 150px;
+    text-align: right;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+
+.personality-bar-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.personality-bar {
+    height: 100%;
+    background-color: #1DB954;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.personality-bar.primary-type {
+    background-color: #1ED760;
+    box-shadow: 0 0 5px rgba(30, 215, 96, 0.7);
+}
+
+.personality-percentage {
+    margin-left: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
 /****************************
 * MOBILE STYLE
 *****************************/
@@ -693,7 +752,8 @@ a, a:visited {
     }
 
     #heatmap-holder,
-    #otd-holder {
+    #otd-holder,
+    #personality-type {
         max-width: 93%;
     }
 
@@ -716,19 +776,25 @@ a, a:visited {
     }
 
     #otd-pagination button,
-    #otd-pagination span {
+    #otd-pagination span,
+    #personality-type p {
         font-size: 2em;
     }
-
-    .tooltip-date {
-        font-size: 2em;
-    }
-
-    .tooltip-plays {
+    
+    .tippy-content {
         font-size: 3em;
     }
 
-    .tooltip-week {
-        font-size: 2.7em;
+    .personality-type-label {
+        width: 300px;
+        font-size: 2em;
+    }
+
+    .personality-percentage {
+        font-size: 2em;
+    }
+
+    .personality-bar-wrapper {
+        height: 40px;
     }
 }

@@ -40,7 +40,8 @@
             allowHTML: true,
             placement: 'top',
             arrow: true,
-            theme: 'spotify'
+            theme: 'spotify',
+            maxWidth: '50em'
         });
 
         container.appendChild(cell);

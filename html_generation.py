@@ -8,6 +8,7 @@ import json
 import logging
 from typing import Dict, List, Any, DefaultDict
 
+
 def ms_to_hms(ms: int) -> str:
     """
     Convert milliseconds to a formatted string hours:minutes:seconds milliseconds.
@@ -25,6 +26,7 @@ def ms_to_hms(ms: int) -> str:
     milliseconds = ms - (hours * 60 * 60 * 1000) - (minutes * 60 * 1000) - (seconds * 1000)
     return f"{hours:02}:{minutes:02}:{seconds:02} {milliseconds:03}ms"
 
+
 def escape_js_string(s: str) -> str:
     """
     Escape special characters in a string for use in JavaScript template literals.
@@ -36,6 +38,7 @@ def escape_js_string(s: str) -> str:
         str: The escaped string
     """
     return s.replace("\\", "\\\\").replace("`", "\\`")
+
 
 def print_file(path: str) -> str:
     """
@@ -69,6 +72,7 @@ def print_file(path: str) -> str:
         raise
     return contents
 
+
 def print_styles() -> str:
     """
     Read CSS files and return HTML style tags with the CSS content.
@@ -100,6 +104,7 @@ def print_styles() -> str:
         logging.error(f"Error loading CSS files: {e}")
         raise
 
+
 def generate_js() -> str:
     """
     Generate JavaScript for the HTML page.
@@ -110,6 +115,7 @@ def generate_js() -> str:
     return f"""<script>
     {print_file("scripts/scripts.js")}
     </script>"""
+
 
 def build_table(title: str, playtime_counts: Dict[str, int], playcount_counts: Dict[str, int], table_id: str) -> str:
     """
@@ -163,6 +169,7 @@ def build_table(title: str, playtime_counts: Dict[str, int], playcount_counts: D
     <div class="pagination" id="{table_id}-nav"></div>
     """
 
+
 def build_year_tabs(years: List[int]) -> str:
     """
     Build HTML for year tabs.
@@ -178,6 +185,7 @@ def build_year_tabs(years: List[int]) -> str:
         for yr in years
     )
 
+
 def build_all_section(all_data: Dict[str, DefaultDict[str, int]]) -> str:
     """
     Build HTML for the "All" section with tables for artists, tracks, and albums.
@@ -190,16 +198,17 @@ def build_all_section(all_data: Dict[str, DefaultDict[str, int]]) -> str:
     """
     sections = '<div class="year-section" id="year-all" style="display: block;">'
     sections += build_table("🎤 Artists",
-                        all_data["artist_time"], all_data["artist_counts"],
-                        "artist-table-all")
+                            all_data["artist_time"], all_data["artist_counts"],
+                            "artist-table-all")
     sections += build_table("🎶 Tracks",
-                        all_data["track_time"], all_data["track_counts"],
-                        "track-table-all")
+                            all_data["track_time"], all_data["track_counts"],
+                            "track-table-all")
     sections += build_table("💿 Albums",
-                        all_data["album_time"], all_data["album_counts"],
-                        "album-table-all")
+                            all_data["album_time"], all_data["album_counts"],
+                            "album-table-all")
     sections += "</div>"
     return sections
+
 
 def build_year_sections(years: List[int], yearly: DefaultDict[int, Dict[str, DefaultDict[str, int]]]) -> str:
     """
@@ -217,16 +226,17 @@ def build_year_sections(years: List[int], yearly: DefaultDict[int, Dict[str, Def
         style = "none"
         sections += f'<div class="year-section" id="year-{yr}" style="display: {style};">'
         sections += build_table("🎤 Artists",
-                            yearly[yr]["artist_time"], yearly[yr]["artist_counts"],
-                            f"artist-table-{yr}")
+                                yearly[yr]["artist_time"], yearly[yr]["artist_counts"],
+                                f"artist-table-{yr}")
         sections += build_table("🎶 Tracks",
-                            yearly[yr]["track_time"], yearly[yr]["track_counts"],
-                            f"track-table-{yr}")
+                                yearly[yr]["track_time"], yearly[yr]["track_counts"],
+                                f"track-table-{yr}")
         sections += build_table("💿 Albums",
-                            yearly[yr]["album_time"], yearly[yr]["album_counts"],
-                            f"album-table-{yr}")
+                                yearly[yr]["album_time"], yearly[yr]["album_counts"],
+                                f"album-table-{yr}")
         sections += "</div>"
     return sections
+
 
 def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], otd_data) -> str:
     """
@@ -244,7 +254,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
         for d, cnt in daily_counts.items()
     })
     first_date = stats_data.get('first_str', "")
-    last_date  = stats_data.get('last_str', "")
+    last_date = stats_data.get('last_str', "")
 
     return f"""
     <h2>Stats</h2>
@@ -294,7 +304,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
              <button class="info-button stats-button"
                      data-info="This means you have {stats_data['edd']} days with at least {stats_data['edd']} plays.">i</button>
           </li>
-          <li>Days to next Eddington ({stats_data['edd']+1}): {stats_data['next_need']}</li>
+          <li>Days to next Eddington ({stats_data['edd'] + 1}): {stats_data['next_need']}</li>
           <li>Artist cut-over point: {stats_data['art_cut']}
              <button class="info-button stats-button"
                      data-info="This means you have {stats_data['art_cut']} artists with at least {stats_data['art_cut']} plays.">i</button>
@@ -322,7 +332,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
              ({stats_data['streak_start'].strftime("%b %d, %Y")} – {stats_data['streak_end'].strftime("%b %d, %Y")})
           </li>
           <li>Longest hiatus: {stats_data['longest_hiatus']} days
-             {f"({stats_data['hi_start_str']} – {stats_data['hi_end_str']})" if stats_data['longest_hiatus']>0 else ""}
+             {f"({stats_data['hi_start_str']} – {stats_data['hi_end_str']})" if stats_data['longest_hiatus'] > 0 else ""}
           </li>
           <li>Average plays per active day: {stats_data['avg_plays']:.2f}</li>
           <li>Most active weekday: {stats_data['wd_name']} ({stats_data['wd_count']} plays)</li>
@@ -345,7 +355,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
           <li>Offline vs Online ratio: {stats_data['ratio_str']} ({stats_data['offline_ratio_pct']:.2f}% offline)</li>
         </ul>
       </div>
-      
+
     <div id="" class="stats-group">
         <h3>On This Day <input type="date" id="otd-date" /></h3>
         <div id="otd-results"></div>
@@ -357,15 +367,6 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
       </div>
     </div>
 
-    <!-- Info modal -->
-    <div id="info-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="info-modal-text" aria-hidden="true">
-      <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="info-modal-text"></h2>
-            <button id="close-info-modal" class="close-button" aria-label="Close information">&times;</button>
-        </div>
-      </div>
-    </div>
 
      <!-- hidden modal -->
     <div id="every-year-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="every-year-title" aria-hidden="true">
@@ -379,7 +380,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
         </ul>
       </div>
     </div>
-    
+
       <div id="heatmap-holder" class="stats-group">
         <h3>Activity Heatmap</h3>
         <div id="calendar-heatmap"></div>
@@ -393,7 +394,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
           <span>More</span>
         </div>
       </div>
-      
+
 
       <script>{print_file("scripts/popper.min.js")}</script>'
       <script>{print_file("scripts/tippy-bundle.umd.min.js")}</script>
@@ -407,7 +408,76 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
       </script>
     """
 
-def generate_html_content(tabs: str, sections: str, stats_html: str, github_url: str, version: str) -> str:
+
+def generate_personality_html(stats_data: Dict[str, Any]) -> str:
+    """
+    Generate HTML for the personality type section.
+
+    Args:
+        stats_data (Dict[str, Any]): Dictionary containing statistics data
+
+    Returns:
+        str: HTML for the personality type section
+    """
+    personality_type = stats_data.get('personality_type', 'Undefined')
+    personality_desc = stats_data.get('personality_desc', 'Your listening style is unique.')
+    personality_percentages = stats_data.get('personality_percentages', {})
+
+    # Descriptions for each personality type
+    descriptions = {
+        "Explorer": "You're always seeking new music and artists. Your diverse taste spans many genres and you rarely get stuck in a musical rut.",
+        "Loyalist": "You have deep connections with your favorite artists. When you find music you love, you stick with it and really get to know an artist's work.",
+        "Eclectic": "Your playlist is a musical mosaic. You appreciate many different styles and aren't bound by genre conventions.",
+        "Focused": "You know what you like and stick to it. Your listening is concentrated on specific genres or artists that resonate with you.",
+        "Weekend Warrior": "Your music consumption spikes on weekends. Music is your companion for weekend activities and relaxation.",
+        "Daily Listener": "Music is integrated into your daily routine. You have consistent listening habits throughout the week.",
+        "Skipper": "You're quick to move on if a song doesn't grab you immediately. You're always searching for the perfect track for the moment.",
+        "Completionist": "You appreciate music from start to finish. When you start a song or album, you tend to listen all the way through.",
+        "Binge Listener": "You dive deep into music sessions, often listening for extended periods. When you find something you love, you immerse yourself completely.",
+        "Variety Seeker": "You thrive on musical diversity. You're constantly exploring different artists and styles, rarely settling into predictable patterns.",
+        "Mood Listener": "Your music choices are guided by your emotions. You select tracks that match or enhance your current mood, creating a personalized soundtrack for your life.",
+        "Deep Diver": "You explore artists' catalogs thoroughly. Rather than sampling broadly, you prefer to discover everything about the artists you connect with."
+    }
+
+    # Sort personality types by percentage (descending)
+    sorted_types = sorted(personality_percentages.items(), key=lambda x: x[1], reverse=True)
+
+    # Generate the bar chart HTML
+    bars_html = ""
+    for ptype, percentage in sorted_types:
+        # Round percentage to 1 decimal place
+        rounded_percentage = round(percentage, 1)
+        # Set the width of the bar based on the percentage
+        bar_width = max(1, rounded_percentage)  # Ensure at least 1% width for visibility
+        # Highlight the primary personality type
+        highlight_class = "primary-type" if ptype == personality_type else ""
+        # Get description for tooltip
+        description = descriptions.get(ptype, "A unique listening style.")
+
+        bars_html += f"""
+        <div class="personality-bar-container" data-tippy-content="{description}">
+            <div class="personality-type-label">{ptype}</div>
+            <div class="personality-bar-wrapper">
+                <div class="personality-bar {highlight_class}" style="width: {bar_width}%"></div>
+                <div class="personality-percentage">{rounded_percentage}%</div>
+            </div>
+        </div>
+        """
+
+    return f"""
+    <h2>Your Listening Personality Type: <span style="color: #1DB954;">{personality_type}</span></h2>
+    <div id="personality-type" class="stats-group">
+        <p>{personality_desc}</p>
+
+        <div class="personality-chart">
+            {bars_html}
+        </div>
+    </div>
+    """
+
+
+def generate_html_content(tabs: str, sections: str, stats_html: str, github_url: str, version: str,
+                          personality_html: str) -> str:
     """
     Generate the complete HTML content for the summary report.
 
@@ -417,6 +487,7 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, github_url:
         stats_html (str): HTML for statistics
         github_url (str): URL to the GitHub repository
         version (str): Version of the application
+        personality_html (str): HTML for the personality type section
 
     Returns:
         str: Complete HTML content as a string
@@ -432,9 +503,9 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, github_url:
     </head>
     <body style='overflow: hidden;'>
         {print_file("html/title_bar.html")}
-
         <div id="year-tabs">{tabs}</div>
         {sections}
+        {personality_html}
         {stats_html}
 
         {print_file("html/settings_modal.html")}
@@ -444,6 +515,7 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, github_url:
     </footer>
     </html>
     """
+
 
 def write_html_to_file(html_content: str, output_file: str) -> None:
     """

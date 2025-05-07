@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] 2025-05-07
+### Added
+- New Listening Personality Type with several different personalities and calculations.
+  - Weights were set based off of only four different sets of data and may need to be adjusted.
+
+### Changed
+- Changed info-buttons to use tippy.js tooltips instead of modal dialogs.
+- Removed unused info-modal code from JavaScript and HTML generation.
+- Updated the default width of tippy.js tooltips to be 50em.
 
 ## [1.14.2] 2025-05-06
 ### Added

@@ -3,7 +3,7 @@ const currentTheme = localStorage.getItem("theme") || "dark";
 themeStyle.textContent = currentTheme === "dark" ? DARK_CSS : LIGHT_CSS;
 const originalRowCache = {};
 const searchTerms = {};
-let itemsPerPage = parseInt(localStorage.getItem("itemsPerPage"), 10) || 10;
+let itemsPerPage = parseInt(localStorage.getItem("itemsPerPage"), 5) || 5;
 
 window.onload = () => {
     const overlay = document.getElementById('loading-overlay');
@@ -281,14 +281,12 @@ function setupModal(modalId, openerId, closeButtonId) {
 document.addEventListener("DOMContentLoaded", () => {
     // Set up all modals
     const {modal: settingsModal} = setupModal("settings-modal", "settings-button", "close-settings");
-    const {modal: infoModal} = setupModal("info-modal", null, "close-info-modal");
     const {modal: everyYearModal} = setupModal("every-year-modal", "show-every-year-btn", "close-every-year-modal");
 
     // Close modals with Escape key
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             closeModal(settingsModal);
-            closeModal(infoModal);
             closeModal(everyYearModal);
         }
     });
@@ -407,12 +405,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Info-button modal setup
-    document.querySelectorAll('.info-button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('info-modal-text').textContent = btn.dataset.info;
-            openModal(infoModal, btn);
-        });
+    // Initialize tooltips for info buttons
+    tippy('.info-button', {
+        content: (reference) => reference.getAttribute('data-info'),
+        allowHTML: true,
+        placement: 'top',
+        arrow: true,
+        theme: 'spotify',
+        maxWidth: '50em'
     });
 
     // Add touch event support for modal closing
@@ -420,5 +420,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target.classList.contains('modal-overlay')) {
             closeModal(e.target);
         }
+    });
+
+    // Initialize tooltips for personality types
+    tippy('.personality-bar-container', {
+        allowHTML: true,
+        placement: 'top',
+        arrow: true,
+        theme: 'spotify',
+        maxWidth: '50em'
     });
 });

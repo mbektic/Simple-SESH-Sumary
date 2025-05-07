@@ -12,12 +12,12 @@ from typing import Any
 from gui import *
 from data_processing import load_spotify_data, process_spotify_data, aggregate_yearly_data
 from html_generation import build_year_tabs, build_all_section, build_year_sections, build_stats_html, \
-    generate_html_content, write_html_to_file
+    generate_html_content, write_html_to_file, generate_personality_html
 from statistics import calculate_all_stats
 from logging_config import configure_logging, log_exception, log_system_info
 
 # The script version. You can check the changelog at the GitHub URL to see if there is a new version.
-VERSION = "1.14.2"
+VERSION = "1.15.0"
 GITHUB_URL = "https://github.com/mbektic/Simple-SESH-Sumary/blob/main/CHANGELOG.md"
 
 # Parse command line arguments
@@ -140,11 +140,14 @@ def count_plays_from_directory(config: Any, progress_callback=None) -> None:
             log_exception()
             raise
 
+        # Generate personality HTML
+        personality_html = generate_personality_html(stats_data)
+
         # Generate complete HTML content
         update_progress("Generating HTML", 0.8)
         try:
             html_content = generate_html_content(
-                tabs, sections, stats_html, GITHUB_URL, VERSION
+                tabs, sections, stats_html, GITHUB_URL, VERSION, personality_html
             )
         except Exception as e:
             logging.error(f"Error generating HTML content: {e}")

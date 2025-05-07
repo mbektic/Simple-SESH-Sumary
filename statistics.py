@@ -703,6 +703,192 @@ def calculate_track_stats(
 
     return result
 
+def calculate_personality_type(stats: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calculate the listening personality type based on various statistics.
+
+    Args:
+        stats: Dictionary containing statistics
+
+    Returns:
+        Dict containing personality type information:
+            - personality_type: The primary personality type
+            - personality_desc: Description of the personality type
+    """
+    try:
+        # Extract relevant statistics
+        unique_ratio = stats.get("unique_ratio_pct", 0)
+        gini = stats.get("gini", 0)
+        skip_rate = stats.get("skip_rate_pct", 0)
+        weekend_ratio = stats.get("ratio_pct", 0)
+        artists_count = stats.get("artists_count", 0)
+        one_hits_pct = stats.get("pct_one_hits", 0)
+        avg_play_ms = stats.get("avg_play_ms", 0)
+        total_plays = stats.get("total_plays", 0)
+        days_played = stats.get("days_played", 0)
+        days_since_first = stats.get("days_since_first", 1)
+        max_streak = stats.get("max_streak", 0)
+        tracks_count = stats.get("tracks_count", 0)
+        albums_count = stats.get("albums_count", 0)
+
+        # Calculate additional metrics
+        listening_frequency = days_played / max(1, days_since_first)
+        artist_to_track_ratio = artists_count / max(1, tracks_count)
+        album_to_artist_ratio = albums_count / max(1, artists_count)
+        avg_play_minutes = avg_play_ms / 60000  # Convert to minutes
+
+        # Define thresholds with more granularity
+        unique_ratio_thresholds = [30, 50, 70]  # Low, Medium, High
+        gini_thresholds = [0.3, 0.5, 0.7]  # Low, Medium, High concentration
+        skip_rate_thresholds = [15, 30, 45]  # Low, Medium, High
+        weekend_ratio_thresholds = [30, 50, 70]  # Low, Medium, High
+        artists_count_thresholds = [50, 100, 200]  # Low, Medium, High
+        one_hits_thresholds = [20, 40, 60]  # Low, Medium, High
+        listening_frequency_thresholds = [0.3, 0.6, 0.9]  # Low, Medium, High (more challenging)
+        avg_play_minutes_thresholds = [2, 3, 4]  # Low, Medium, High
+        streak_thresholds = [5, 14, 30]  # Low, Medium, High
+
+        # Helper function to get score based on thresholds
+        def get_threshold_score(value, thresholds, reverse=False):
+            if reverse:
+                if value <= thresholds[0]: return 3
+                if value <= thresholds[1]: return 2
+                if value <= thresholds[2]: return 1
+                return 0
+            else:
+                if value >= thresholds[2]: return 3
+                if value >= thresholds[1]: return 2
+                if value >= thresholds[0]: return 1
+                return 0
+
+        # Calculate more nuanced scores for each personality type
+        scores = {
+            "Explorer": (
+                get_threshold_score(unique_ratio, unique_ratio_thresholds) * 1.7 +  # Boosted weight
+                get_threshold_score(gini, gini_thresholds, reverse=True) * 1.7 +  # Boosted weight
+                get_threshold_score(artists_count, artists_count_thresholds) * 1.5 +  # Boosted weight
+                get_threshold_score(one_hits_pct, one_hits_thresholds) * 1.2 +  # Boosted weight
+                (1.0 if artist_to_track_ratio < 0.3 else 0) +  # Many tracks per artist (boosted)
+                (1.5 if unique_ratio > 60 else 0)  # Added: very high unique ratio
+            ),
+            "Loyalist": (
+                get_threshold_score(unique_ratio, unique_ratio_thresholds, reverse=True) * 1.2 +
+                get_threshold_score(gini, gini_thresholds) * 1.5 +
+                get_threshold_score(artists_count, artists_count_thresholds, reverse=True) * 1.0 +
+                (1.0 if album_to_artist_ratio > 1.5 else 0)  # Multiple albums per artist
+            ),
+            "Eclectic": (
+                get_threshold_score(one_hits_pct, one_hits_thresholds) * 1.5 +
+                get_threshold_score(artists_count, artists_count_thresholds) * 1.2 +
+                get_threshold_score(unique_ratio, unique_ratio_thresholds) * 1.0 +
+                (1.0 if artist_to_track_ratio > 0.7 else 0)  # Few tracks per artist
+            ),
+            "Focused": (
+                get_threshold_score(one_hits_pct, one_hits_thresholds, reverse=True) * 1.5 +
+                get_threshold_score(gini, gini_thresholds) * 1.2 +
+                get_threshold_score(unique_ratio, unique_ratio_thresholds, reverse=True) * 1.0 +
+                (1.0 if tracks_count < 200 else 0)  # Limited track selection
+            ),
+            "Weekend Warrior": (
+                get_threshold_score(weekend_ratio, weekend_ratio_thresholds) * 2.5 +  # Boosted weight
+                get_threshold_score(listening_frequency, listening_frequency_thresholds, reverse=True) * 1.5 +  # Boosted weight
+                (1.5 if max_streak < 5 else 0) +  # Short listening streaks (boosted)
+                (2.0 if weekend_ratio > 65 else 0) +  # Added: very high weekend ratio
+                (1.5 if days_played < days_since_first * 0.4 else 0)  # Added: infrequent listener
+            ),
+            "Daily Listener": (
+                get_threshold_score(listening_frequency, listening_frequency_thresholds) * 1.5 +  # Reduced weight
+                get_threshold_score(weekend_ratio, weekend_ratio_thresholds, reverse=True) * 0.8 +  # Reduced weight
+                get_threshold_score(max_streak, streak_thresholds) * 0.7 +  # Reduced weight
+                (1.0 if total_plays / max(1, days_played) > 8 else 0)  # More specific condition
+            ),
+            "Skipper": (
+                get_threshold_score(skip_rate, skip_rate_thresholds) * 2.0 +
+                get_threshold_score(avg_play_minutes, avg_play_minutes_thresholds, reverse=True) * 1.5 +
+                get_threshold_score(unique_ratio, unique_ratio_thresholds) * 0.8 +
+                (1.0 if total_plays > 1000 else 0)  # High volume listener
+            ),
+            "Completionist": (
+                get_threshold_score(skip_rate, skip_rate_thresholds, reverse=True) * 2.0 +  # Boosted weight
+                get_threshold_score(avg_play_minutes, avg_play_minutes_thresholds) * 2.5 +  # Boosted weight
+                (1.5 if album_to_artist_ratio > 1.2 else 0) +  # Complete albums (boosted)
+                (1.5 if gini < 0.4 else 0) +  # Even listening across artists (boosted)
+                (2.0 if skip_rate < 10 else 0) +  # Added: very low skip rate
+                (1.5 if avg_play_minutes > 4.5 else 0)  # Added: very long average play time
+            ),
+            "Binge Listener": (
+                (2.0 if max_streak > 10 else 0) +  # Long listening streaks (further reduced)
+                get_threshold_score(total_plays, [500, 1000, 2000]) * 1.5 +  # Further reduced weight
+                (1.4 if gini > 0.6 else 0) +  # Concentrated listening (further reduced)
+                (1.2 if total_plays / max(1, days_played) > 10 else 0)  # Many plays per active day (further reduced)
+            ),
+            "Variety Seeker": (
+                get_threshold_score(artists_count, artists_count_thresholds) * 1.5 +  # Reduced weight
+                get_threshold_score(one_hits_pct, one_hits_thresholds) * 1.5 +  # Reduced weight
+                (1.7 if artist_to_track_ratio > 0.5 else 0) +  # Many artists relative to tracks (slightly reduced)
+                (1.5 if gini < 0.4 else 0)  # Even distribution across artists
+            ),
+            "Mood Listener": (
+                get_threshold_score(skip_rate, skip_rate_thresholds) * 1.6 +  # Boosted weight
+                (2.0 if weekend_ratio > 40 and weekend_ratio < 60 else 0) +  # Balanced weekend/weekday (boosted)
+                get_threshold_score(unique_ratio, unique_ratio_thresholds) * 1.3 +  # Boosted weight
+                (2.0 if listening_frequency > 0.3 and listening_frequency < 0.7 else 0)  # Moderate frequency (boosted)
+            ),
+            "Deep Diver": (
+                get_threshold_score(avg_play_minutes, avg_play_minutes_thresholds) * 1.8 +  # Boosted weight
+                (2.5 if album_to_artist_ratio > 2.0 else 0) +  # Multiple albums per artist (boosted)
+                get_threshold_score(skip_rate, skip_rate_thresholds, reverse=True) * 1.4 +  # Boosted weight
+                (2.0 if artists_count < 50 and tracks_count > 200 else 0) +  # Few artists but many tracks (boosted)
+                (1.5 if gini > 0.5 and gini < 0.7 else 0)  # Added: moderate concentration on specific artists
+            )
+        }
+
+        # Find the personality type with the highest score
+        personality_type = max(scores.items(), key=lambda x: x[1])[0]
+
+        # Define descriptions for each personality type
+        descriptions = {
+            "Explorer": "You're always seeking new music and artists. Your diverse taste spans many genres and you rarely get stuck in a musical rut.",
+            "Loyalist": "You have deep connections with your favorite artists. When you find music you love, you stick with it and really get to know an artist's work.",
+            "Eclectic": "Your playlist is a musical mosaic. You appreciate many different styles and aren't bound by genre conventions.",
+            "Focused": "You know what you like and stick to it. Your listening is concentrated on specific genres or artists that resonate with you.",
+            "Weekend Warrior": "Your music consumption spikes on weekends. Music is your companion for weekend activities and relaxation.",
+            "Daily Listener": "Music is integrated into your daily routine. You have consistent listening habits throughout the week.",
+            "Skipper": "You're quick to move on if a song doesn't grab you immediately. You're always searching for the perfect track for the moment.",
+            "Completionist": "You appreciate music from start to finish. When you start a song or album, you tend to listen all the way through.",
+            "Binge Listener": "You dive deep into music sessions, often listening for extended periods. When you find something you love, you immerse yourself completely.",
+            "Variety Seeker": "You thrive on musical diversity. You're constantly exploring different artists and styles, rarely settling into predictable patterns.",
+            "Mood Listener": "Your music choices are guided by your emotions. You select tracks that match or enhance your current mood, creating a personalized soundtrack for your life.",
+            "Deep Diver": "You explore artists' catalogs thoroughly. Rather than sampling broadly, you prefer to discover everything about the artists you connect with."
+        }
+
+        # Calculate total score for percentage calculation
+        total_score = sum(scores.values())
+
+        # Calculate percentages for each personality type
+        percentages = {}
+        if total_score > 0:
+            for ptype, score in scores.items():
+                percentages[ptype] = (score / total_score) * 100
+        else:
+            # If total score is 0, distribute evenly
+            even_percentage = 100 / len(scores)
+            for ptype in scores.keys():
+                percentages[ptype] = even_percentage
+
+        return {
+            "personality_type": personality_type,
+            "personality_desc": descriptions.get(personality_type, "Your listening style is unique and defies easy categorization."),
+            "personality_scores": scores,
+            "personality_percentages": percentages
+        }
+    except Exception as e:
+        logging.error(f"Error computing personality type: {e}")
+        return {
+            "personality_type": "Undefined",
+            "personality_desc": "We couldn't determine your listening personality type."
+        }
+
 def calculate_all_stats(
     yearly: DefaultDict[int, Dict[str, DefaultDict[str, int]]],
     all_data: Dict[str, DefaultDict[str, int]],
@@ -791,5 +977,9 @@ def calculate_all_stats(
     all_stats.update(pattern_stats)
     all_stats.update(session_stats)
     all_stats.update(track_stats)
+
+    # Calculate personality type
+    personality_stats = calculate_personality_type(all_stats)
+    all_stats.update(personality_stats)
 
     return all_stats
