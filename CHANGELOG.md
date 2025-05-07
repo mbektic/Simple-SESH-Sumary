@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.2] 2025-05-07
+### Changed
+- Set the default font to `JetBrains Mono - monospace` as it comes off more legible, will still fall back to `Courier New - monospace` if the font is not available.
+- Updated On This Day output section.
+
+### Fixed
+- Removed random floating `'` above the version number. 
+
 ## [1.15.1] 2025-05-07
 ### Changed
 - Changed the bar scaling inside the Personality Type graph to scale off the highest value instead of 100%. 

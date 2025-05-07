@@ -9,7 +9,7 @@
 }
 
 body {
-    font-family: 'Courier New', monospace;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
     margin: 0;
 }
 
@@ -554,6 +554,10 @@ a, a:visited {
     justify-content: center;
     gap: 1em;
     align-items: center;
+}
+
+.otd-track {
+    color: #1DB954;
 }
 
 #stats ol {

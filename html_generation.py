@@ -396,7 +396,7 @@ def build_stats_html(stats_data: Dict[str, Any], daily_counts: Dict[str, int], o
       </div>
 
 
-      <script>{print_file("scripts/popper.min.js")}</script>'
+      <script>{print_file("scripts/popper.min.js")}</script>
       <script>{print_file("scripts/tippy-bundle.umd.min.js")}</script>
       <script>
         const startDate = new Date("{first_date}");
@@ -493,6 +493,7 @@ def generate_html_content(tabs: str, sections: str, stats_html: str, github_url:
     <head>
         <meta charset="UTF-8">
         <title>Spotify Summary</title>
+        <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
         {print_styles()}
         {generate_js()}
     </head>

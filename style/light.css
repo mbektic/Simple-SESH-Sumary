@@ -23,14 +23,6 @@ tr:hover {
     border-color: #007bff;
 }
 
-th, td, a {
-    font-weight: bold;
-}
-
-.highlight {
-    font-weight: bolder;
-}
-
 #stats,
 #heatmap-holder,
 #otd-holder {

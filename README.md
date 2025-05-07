@@ -50,7 +50,10 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ![Image](https://github.com/user-attachments/assets/a18a3ea2-279a-494e-bcf5-97989c344841)
 
 ### Stats
-![Image](https://github.com/user-attachments/assets/d58bf131-180e-4bab-ab78-2ad2246ed5ca)
+![Image](https://github.com/user-attachments/assets/fcac2f11-4e1b-4e4d-be34-a0673d5e634c)
+![Image](https://github.com/user-attachments/assets/c849a630-78e1-43d4-8fa7-7dda20969c7b)
+![Image](https://github.com/user-attachments/assets/ff73754e-2461-4261-9d91-f4af2a06c42e)
+![Image](https://github.com/user-attachments/assets/84f50afd-3810-445c-9679-7686b589aa2b)
 ![Image](https://github.com/user-attachments/assets/bfa47186-ae50-4c73-a2b4-77e7fdf0b0db)
 ![Image](https://github.com/user-attachments/assets/29c716bd-3300-4ade-afdf-1f97cb6d92fd)
 

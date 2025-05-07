@@ -12,7 +12,7 @@ function renderOTDPage() {
       ${slice.map(({track, date, count}) => `
         <li>
           <span class="otd-track">${track}</span>
-          <span class="otd-meta">played ${count}× on ${new Date(date + 'T12:00:00Z').toLocaleDateString()}</span>
+          <span class="otd-meta">${count}× on ${new Date(date + 'T12:00:00Z').toLocaleDateString()}</span>
         </li>
       `).join("")}
     </ol>
