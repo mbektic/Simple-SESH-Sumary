@@ -423,7 +423,6 @@ def generate_personality_html(stats_data: Dict[str, Any]) -> str:
     personality_desc = stats_data.get('personality_desc', 'Your listening style is unique.')
     personality_percentages = stats_data.get('personality_percentages', {})
 
-    # Descriptions for each personality type
     descriptions = {
         "Explorer": "You're always seeking new music and artists. Your diverse taste spans many genres and you rarely get stuck in a musical rut.",
         "Loyalist": "You have deep connections with your favorite artists. When you find music you love, you stick with it and really get to know an artist's work.",
@@ -441,24 +440,21 @@ def generate_personality_html(stats_data: Dict[str, Any]) -> str:
 
     # Sort personality types by percentage (descending)
     sorted_types = sorted(personality_percentages.items(), key=lambda x: x[1], reverse=True)
+    max_percentage = max((v for v in personality_percentages.values()), default=1)  # Avoid division by 0
 
-    # Generate the bar chart HTML
     bars_html = ""
     for ptype, percentage in sorted_types:
-        # Round percentage to 1 decimal place
         rounded_percentage = round(percentage, 1)
-        # Set the width of the bar based on the percentage
-        bar_width = max(1, rounded_percentage)  # Ensure at least 1% width for visibility
-        # Highlight the primary personality type
+        scaled_width = max(5, (percentage / max_percentage) * 100)  # Ensure visibility
+
         highlight_class = "primary-type" if ptype == personality_type else ""
-        # Get description for tooltip
         description = descriptions.get(ptype, "A unique listening style.")
 
         bars_html += f"""
         <div class="personality-bar-container" data-tippy-content="{description}">
             <div class="personality-type-label">{ptype}</div>
             <div class="personality-bar-wrapper">
-                <div class="personality-bar {highlight_class}" style="width: {bar_width}%"></div>
+                <div class="personality-bar {highlight_class}" style="width: {scaled_width:.1f}%"></div>
                 <div class="personality-percentage">{rounded_percentage}%</div>
             </div>
         </div>
@@ -468,7 +464,6 @@ def generate_personality_html(stats_data: Dict[str, Any]) -> str:
     <h2>Your Listening Personality Type: <span style="color: #1DB954;">{personality_type}</span></h2>
     <div id="personality-type" class="stats-group">
         <p>{personality_desc}</p>
-
         <div class="personality-chart">
             {bars_html}
         </div>

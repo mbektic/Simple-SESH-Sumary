@@ -617,6 +617,7 @@ a, a:visited {
     margin-left: 10px;
     font-weight: bold;
     color: #333;
+    position: absolute;
 }
 
 /****************************
@@ -780,7 +781,7 @@ a, a:visited {
     #personality-type p {
         font-size: 2em;
     }
-    
+
     .tippy-content {
         font-size: 3em;
     }

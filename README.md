@@ -46,6 +46,9 @@ Example page [mbektic.com/SESH](https://mbektic.com/SESH/)
 ### Albums (Search)
 ![Image](https://github.com/user-attachments/assets/1a9ba192-1fc5-4cc6-b115-a5f57ebef6db)
 
+### Personality Type
+![Image](https://github.com/user-attachments/assets/a18a3ea2-279a-494e-bcf5-97989c344841)
+
 ### Stats
 ![Image](https://github.com/user-attachments/assets/d58bf131-180e-4bab-ab78-2ad2246ed5ca)
 ![Image](https://github.com/user-attachments/assets/bfa47186-ae50-4c73-a2b4-77e7fdf0b0db)
