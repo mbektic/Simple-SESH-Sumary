@@ -412,7 +412,8 @@ document.addEventListener("DOMContentLoaded", () => {
         placement: 'top',
         arrow: true,
         theme: 'spotify',
-        maxWidth: '50em'
+        maxWidth: '50em',
+        trigger: 'click',
     });
 
     // Add touch event support for modal closing
